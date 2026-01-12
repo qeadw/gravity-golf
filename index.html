@@ -1628,10 +1628,8 @@
             if (state.ballLaunched) return;
 
             const level = levels[state.currentLevel];
-            // Reset timing state so physics is fully deterministic
+            // Reset gameTime so moving obstacles always start from same position
             state.gameTime = 0;
-            state.lastTime = 0;
-            state.accumulator = 0;
             state.ball.launch(level.launchAngle, level.launchPower);
             state.ballLaunched = true;
         }
@@ -2075,24 +2073,8 @@
         }
 
         function gameLoop(currentTime) {
-            if (state.lastTime === 0) {
-                state.lastTime = currentTime;
-            }
-
-            const deltaTime = currentTime - state.lastTime;
-            state.lastTime = currentTime;
-
-            state.accumulator += deltaTime;
-
-            if (state.accumulator > 200) {
-                state.accumulator = 200;
-            }
-
-            while (state.accumulator >= FIXED_TIMESTEP) {
-                fixedUpdate();
-                state.accumulator -= FIXED_TIMESTEP;
-            }
-
+            // Run exactly one physics update per frame for 100% deterministic behavior
+            fixedUpdate();
             render();
             requestAnimationFrame(gameLoop);
         }
