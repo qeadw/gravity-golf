@@ -564,7 +564,11 @@
         }
 
         function resetLevel() {
-            loadLevel(state.currentLevel);
+            const level = levels[state.currentLevel];
+            state.ball = new Ball(level.ball.x, level.ball.y);
+            state.ballLaunched = false;
+            state.trail = [];
+            hideMessage();
         }
 
         function launchBall() {
