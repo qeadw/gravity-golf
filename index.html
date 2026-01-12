@@ -315,7 +315,8 @@
             accumulator: 0,
             gameTime: 0,
             cheatsEnabled: false,
-            cheatBuffer: ''
+            cheatBuffer: '',
+            portalCooldown: 0
         };
 
         const FIXED_TIMESTEP = 1000 / 60;
@@ -1422,14 +1423,15 @@
                     }
                 }
 
-                // Apply gravity from black holes
+                // Apply gravity from black holes (linear falloff for stronger pull)
                 for (const bh of blackHoles) {
                     const dx = bh.x - this.x;
                     const dy = bh.y - this.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
 
                     if (dist > 10) {
-                        const force = bh.strength / (dist * dist);
+                        // Linear falloff instead of inverse square for much stronger pull
+                        const force = bh.strength / dist;
                         this.vx += (dx / dist) * force;
                         this.vy += (dy / dist) * force;
                     }
@@ -1610,6 +1612,7 @@
             state.gameTime = 0;
             state.lastTime = 0;
             state.accumulator = 0;
+            state.portalCooldown = 0;
 
             // Reset moving obstacles
             state.movingObstacles = (level.movingObstacles || []).map(o => ({
@@ -1642,6 +1645,12 @@
         }
 
         function checkPortalCollision() {
+            // Decrease cooldown
+            if (state.portalCooldown > 0) {
+                state.portalCooldown--;
+                return;
+            }
+
             for (const portal of state.portals) {
                 const dx1 = state.ball.x - portal.x1;
                 const dy1 = state.ball.y - portal.y1;
@@ -1650,6 +1659,7 @@
                 if (dist1 < state.ball.radius + portal.radius) {
                     state.ball.x = portal.x2;
                     state.ball.y = portal.y2;
+                    state.portalCooldown = 30; // 0.5 second cooldown at 60fps
                     return;
                 }
 
@@ -1660,6 +1670,7 @@
                 if (dist2 < state.ball.radius + portal.radius) {
                     state.ball.x = portal.x1;
                     state.ball.y = portal.y1;
+                    state.portalCooldown = 30; // 0.5 second cooldown at 60fps
                     return;
                 }
             }
