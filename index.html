@@ -15,12 +15,13 @@
             background: #0a0a1a;
             color: #fff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            overflow: hidden;
+            overflow: auto;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             min-height: 100vh;
+            padding: 20px;
         }
 
         #gameContainer {
@@ -32,6 +33,7 @@
             border: 2px solid #2a2a4a;
             border-radius: 8px;
             cursor: crosshair;
+            display: block;
         }
 
         #ui {
@@ -39,8 +41,10 @@
             top: 10px;
             left: 10px;
             display: flex;
-            gap: 10px;
+            gap: 8px;
             align-items: center;
+            flex-wrap: wrap;
+            max-width: 70%;
         }
 
         #levelInfo {
@@ -54,10 +58,10 @@
             background: linear-gradient(135deg, #4a4a6a, #2a2a4a);
             border: 1px solid #5a5a8a;
             color: #fff;
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 4px;
             cursor: pointer;
-            font-size: 14px;
+            font-size: 13px;
             transition: all 0.2s;
         }
 
@@ -77,9 +81,9 @@
 
         #wellCounter {
             background: rgba(0,0,0,0.5);
-            padding: 8px 16px;
+            padding: 8px 14px;
             border-radius: 4px;
-            font-size: 14px;
+            font-size: 13px;
         }
 
         #instructions {
@@ -90,9 +94,9 @@
             background: rgba(0,0,0,0.7);
             padding: 10px 20px;
             border-radius: 4px;
-            font-size: 13px;
+            font-size: 12px;
             text-align: center;
-            max-width: 600px;
+            max-width: 90%;
         }
 
         #message {
@@ -120,23 +124,19 @@
             color: #f87171;
         }
 
-        .mode-indicator {
-            font-size: 12px;
-            color: #888;
-            margin-left: 10px;
-        }
-
         #levelSelect {
-            position: absolute;
+            position: fixed;
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            background: rgba(10, 10, 26, 0.95);
+            background: rgba(10, 10, 26, 0.98);
             border: 2px solid #4a4a6a;
             border-radius: 12px;
             padding: 30px;
             display: none;
             z-index: 100;
+            max-height: 90vh;
+            overflow-y: auto;
         }
 
         #levelSelect.show {
@@ -144,24 +144,34 @@
         }
 
         #levelSelect h2 {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             text-align: center;
+        }
+
+        .pod-label {
+            font-size: 14px;
+            color: #888;
+            margin: 15px 0 8px 0;
+            border-bottom: 1px solid #333;
+            padding-bottom: 5px;
         }
 
         .level-grid {
             display: grid;
-            grid-template-columns: repeat(5, 1fr);
-            gap: 10px;
+            grid-template-columns: repeat(10, 1fr);
+            gap: 8px;
+            margin-bottom: 10px;
         }
 
         .level-btn {
-            width: 50px;
-            height: 50px;
+            width: 40px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 14px;
             font-weight: bold;
+            padding: 0;
         }
 
         .level-btn.completed {
@@ -172,6 +182,37 @@
         .level-btn.locked {
             opacity: 0.5;
             cursor: not-allowed;
+        }
+
+        .level-btn.boss {
+            border-color: #ff6b6b;
+            box-shadow: 0 0 10px rgba(255, 107, 107, 0.3);
+        }
+
+        .level-btn.challenge {
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+        }
+
+        .legend {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 15px;
+            font-size: 12px;
+            color: #888;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .legend-color {
+            width: 12px;
+            height: 12px;
+            border-radius: 2px;
         }
     </style>
 </head>
@@ -186,25 +227,30 @@
             <button class="btn" id="repulsorBtn">Repulsor</button>
             <button class="btn" id="clearWellsBtn">Clear Wells</button>
             <span id="wellCounter">Wells: 0 / 5</span>
-            <span class="mode-indicator" id="modeIndicator">Click canvas to place well</span>
         </div>
 
         <div id="levelInfo">
-            <div>Level <span id="currentLevel">1</span></div>
+            <div>Level <span id="currentLevel">1</span> / 60</div>
+            <div id="podName" style="font-size: 12px; color: #888; margin-top: 3px;"></div>
             <button class="btn" id="levelSelectBtn" style="margin-top: 5px;">Levels</button>
         </div>
 
         <div id="instructions">
-            Place gravity wells to guide the ball to the green goal.
-            <strong>Attractors</strong> (blue) pull the ball, <strong>Repulsors</strong> (red) push it away.
-            Scroll wheel adjusts well strength. Avoid red obstacles!
+            <strong>Attractors</strong> (blue) pull, <strong>Repulsors</strong> (red) push.
+            Scroll wheel adjusts strength. Right-click to remove wells.
+            <span id="obstacleHint"></span>
         </div>
 
         <div id="message"></div>
 
         <div id="levelSelect">
             <h2>Select Level</h2>
-            <div class="level-grid" id="levelGrid"></div>
+            <div id="levelGridContainer"></div>
+            <div class="legend">
+                <div class="legend-item"><div class="legend-color" style="background: #4a8a6a;"></div> Completed</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ff6b6b;"></div> Boss Level</div>
+                <div class="legend-item"><div class="legend-color" style="background: #ffd700;"></div> Challenge</div>
+            </div>
             <button class="btn" style="margin-top: 20px; width: 100%;" id="closeLevelSelect">Close</button>
         </div>
     </div>
@@ -217,11 +263,43 @@
         const canvas = document.getElementById('gameCanvas');
         const ctx = canvas.getContext('2d');
 
+        // Canvas sizes per pod
+        const CANVAS_SIZES = {
+            0: { width: 900, height: 600 },   // Levels 1-10
+            1: { width: 1000, height: 650 },  // Levels 11-20
+            2: { width: 1100, height: 700 },  // Levels 21-30
+            3: { width: 1200, height: 750 },  // Levels 31-40
+            4: { width: 1300, height: 800 },  // Levels 41-50
+            5: { width: 1500, height: 900 }   // Levels 51-60 (Challenge)
+        };
+
+        const POD_NAMES = [
+            "The Basics",
+            "Moving Targets",
+            "Event Horizon",
+            "Portal Storm",
+            "Pinball Wizard",
+            "The Gauntlet"
+        ];
+
+        const POD_HINTS = [
+            "",
+            " | <span style='color:#ffaa00'>Orange walls</span> move back and forth!",
+            " | <span style='color:#8800ff'>Black holes</span> pull and destroy!",
+            " | <span style='color:#00ffaa'>Portals</span> teleport the ball!",
+            " | <span style='color:#00aaff'>Bumpers</span> bounce with force!",
+            " | CHALLENGE: All obstacles combined!"
+        ];
+
         // Game State
         const state = {
             ball: null,
             goal: null,
             obstacles: [],
+            movingObstacles: [],
+            blackHoles: [],
+            portals: [],
+            bumpers: [],
             wells: [],
             isLaunching: false,
             ballLaunched: false,
@@ -229,32 +307,33 @@
             currentLevel: 0,
             completedLevels: new Set(),
             maxWells: 5,
-            wellMode: 'attractor', // 'attractor' or 'repulsor'
+            wellMode: 'attractor',
             selectedWell: null,
             trail: [],
             maxTrailLength: 50,
             lastTime: 0,
-            accumulator: 0
+            accumulator: 0,
+            gameTime: 0
         };
 
-        // Fixed timestep for deterministic physics
-        const FIXED_TIMESTEP = 1000 / 60; // 60 updates per second
+        const FIXED_TIMESTEP = 1000 / 60;
 
-        // Physics constants
         const PHYSICS = {
-            gravity: 0,
             friction: 0.999,
             minSpeed: 0.1,
             maxSpeed: 15,
             wellStrengthMin: 50,
             wellStrengthMax: 300,
-            wellStrengthDefault: 150
+            wellStrengthDefault: 150,
+            blackHoleStrength: 400,
+            bumperForce: 8
         };
 
         // ============================================
-        // LEVEL DEFINITIONS
+        // LEVEL DEFINITIONS - 60 LEVELS
         // ============================================
         const levels = [
+            // ========== POD 1: THE BASICS (1-10) ==========
             {
                 name: "First Steps",
                 ball: { x: 100, y: 300 },
@@ -262,6 +341,15 @@
                 obstacles: [],
                 maxWells: 3,
                 launchAngle: 0,
+                launchPower: 5
+            },
+            {
+                name: "Slight Curve",
+                ball: { x: 100, y: 200 },
+                goal: { x: 800, y: 400, radius: 30 },
+                obstacles: [],
+                maxWells: 2,
+                launchAngle: 10,
                 launchPower: 5
             },
             {
@@ -283,12 +371,12 @@
                     { x: 400, y: 0, width: 30, height: 200 },
                     { x: 400, y: 350, width: 30, height: 250 }
                 ],
-                maxWells: 4,
+                maxWells: 3,
                 launchAngle: 0,
                 launchPower: 5
             },
             {
-                name: "Maze Runner",
+                name: "Zigzag",
                 ball: { x: 80, y: 100 },
                 goal: { x: 820, y: 500, radius: 30 },
                 obstacles: [
@@ -301,96 +389,994 @@
                 launchPower: 4
             },
             {
-                name: "Spiral",
-                ball: { x: 450, y: 50 },
-                goal: { x: 450, y: 550, radius: 30 },
+                name: "Repulse",
+                ball: { x: 100, y: 300 },
+                goal: { x: 800, y: 300, radius: 30 },
                 obstacles: [
-                    { x: 200, y: 150, width: 400, height: 20 },
-                    { x: 300, y: 300, width: 400, height: 20 },
-                    { x: 200, y: 450, width: 400, height: 20 }
+                    { x: 300, y: 200, width: 300, height: 30 },
+                    { x: 300, y: 370, width: 300, height: 30 }
                 ],
-                maxWells: 5,
+                maxWells: 3,
+                launchAngle: 0,
+                launchPower: 4
+            },
+            {
+                name: "The Funnel",
+                ball: { x: 450, y: 50 },
+                goal: { x: 450, y: 550, radius: 25 },
+                obstacles: [
+                    { x: 200, y: 150, width: 150, height: 20 },
+                    { x: 550, y: 150, width: 150, height: 20 },
+                    { x: 250, y: 300, width: 100, height: 20 },
+                    { x: 550, y: 300, width: 100, height: 20 }
+                ],
+                maxWells: 4,
                 launchAngle: 90,
                 launchPower: 3
             },
             {
-                name: "The Gauntlet",
+                name: "Around the Block",
+                ball: { x: 100, y: 300 },
+                goal: { x: 800, y: 300, radius: 25 },
+                obstacles: [
+                    { x: 350, y: 200, width: 200, height: 200 }
+                ],
+                maxWells: 3,
+                launchAngle: -20,
+                launchPower: 5
+            },
+            {
+                name: "Corridor",
                 ball: { x: 50, y: 300 },
                 goal: { x: 850, y: 300, radius: 25 },
                 obstacles: [
-                    { x: 200, y: 200, width: 20, height: 100 },
-                    { x: 200, y: 350, width: 20, height: 100 },
-                    { x: 400, y: 150, width: 20, height: 150 },
-                    { x: 400, y: 350, width: 20, height: 150 },
-                    { x: 600, y: 200, width: 20, height: 100 },
-                    { x: 600, y: 350, width: 20, height: 100 }
+                    { x: 150, y: 0, width: 20, height: 250 },
+                    { x: 150, y: 350, width: 20, height: 250 },
+                    { x: 350, y: 0, width: 20, height: 200 },
+                    { x: 350, y: 400, width: 20, height: 200 },
+                    { x: 550, y: 0, width: 20, height: 250 },
+                    { x: 550, y: 350, width: 20, height: 250 },
+                    { x: 750, y: 0, width: 20, height: 200 },
+                    { x: 750, y: 400, width: 20, height: 200 }
+                ],
+                maxWells: 6,
+                launchAngle: 0,
+                launchPower: 3
+            },
+            // BOSS LEVEL 10
+            {
+                name: "BOSS: The Maze",
+                ball: { x: 50, y: 50 },
+                goal: { x: 850, y: 550, radius: 20 },
+                obstacles: [
+                    { x: 100, y: 0, width: 15, height: 500 },
+                    { x: 200, y: 100, width: 15, height: 500 },
+                    { x: 300, y: 0, width: 15, height: 450 },
+                    { x: 400, y: 150, width: 15, height: 450 },
+                    { x: 500, y: 0, width: 15, height: 400 },
+                    { x: 600, y: 200, width: 15, height: 400 },
+                    { x: 700, y: 0, width: 15, height: 450 },
+                    { x: 800, y: 150, width: 15, height: 450 }
+                ],
+                maxWells: 8,
+                launchAngle: 45,
+                launchPower: 4,
+                isBoss: true
+            },
+
+            // ========== POD 2: MOVING TARGETS (11-20) ==========
+            {
+                name: "First Motion",
+                ball: { x: 100, y: 325 },
+                goal: { x: 900, y: 325, radius: 30 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 500, y: 200, width: 30, height: 150, axis: 'y', range: 200, speed: 2 }
+                ],
+                maxWells: 3,
+                launchAngle: 0,
+                launchPower: 4
+            },
+            {
+                name: "Double Trouble",
+                ball: { x: 100, y: 325 },
+                goal: { x: 900, y: 325, radius: 30 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 350, y: 150, width: 25, height: 120, axis: 'y', range: 250, speed: 2.5 },
+                    { x: 650, y: 400, width: 25, height: 120, axis: 'y', range: 250, speed: 2.5 }
+                ],
+                maxWells: 4,
+                launchAngle: 0,
+                launchPower: 4
+            },
+            {
+                name: "Horizontal Sweep",
+                ball: { x: 100, y: 550 },
+                goal: { x: 900, y: 100, radius: 28 },
+                obstacles: [
+                    { x: 0, y: 300, width: 400, height: 20 }
+                ],
+                movingObstacles: [
+                    { x: 200, y: 350, width: 150, height: 20, axis: 'x', range: 300, speed: 3 }
+                ],
+                maxWells: 4,
+                launchAngle: -45,
+                launchPower: 5
+            },
+            {
+                name: "The Gauntlet Run",
+                ball: { x: 80, y: 325 },
+                goal: { x: 920, y: 325, radius: 28 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 250, y: 100, width: 20, height: 100, axis: 'y', range: 350, speed: 3 },
+                    { x: 450, y: 450, width: 20, height: 100, axis: 'y', range: 350, speed: 3.5 },
+                    { x: 650, y: 150, width: 20, height: 100, axis: 'y', range: 300, speed: 2.5 }
+                ],
+                maxWells: 5,
+                launchAngle: 0,
+                launchPower: 5
+            },
+            {
+                name: "Crossfire",
+                ball: { x: 500, y: 600 },
+                goal: { x: 500, y: 50, radius: 28 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 100, y: 250, width: 150, height: 20, axis: 'x', range: 300, speed: 4 },
+                    { x: 550, y: 350, width: 150, height: 20, axis: 'x', range: 300, speed: 4 }
+                ],
+                maxWells: 4,
+                launchAngle: -90,
+                launchPower: 4
+            },
+            {
+                name: "Patience",
+                ball: { x: 100, y: 325 },
+                goal: { x: 900, y: 325, radius: 25 },
+                obstacles: [
+                    { x: 400, y: 0, width: 20, height: 250 },
+                    { x: 400, y: 400, width: 20, height: 250 }
+                ],
+                movingObstacles: [
+                    { x: 385, y: 250, width: 50, height: 30, axis: 'y', range: 120, speed: 1.5 }
+                ],
+                maxWells: 3,
+                launchAngle: 0,
+                launchPower: 3
+            },
+            {
+                name: "Windmill",
+                ball: { x: 100, y: 550 },
+                goal: { x: 900, y: 100, radius: 25 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 300, y: 200, width: 100, height: 20, axis: 'y', range: 300, speed: 2 },
+                    { x: 500, y: 400, width: 100, height: 20, axis: 'y', range: 300, speed: 2 },
+                    { x: 700, y: 150, width: 100, height: 20, axis: 'y', range: 300, speed: 2 }
+                ],
+                maxWells: 5,
+                launchAngle: -30,
+                launchPower: 5
+            },
+            {
+                name: "Squeeze Play",
+                ball: { x: 100, y: 325 },
+                goal: { x: 900, y: 325, radius: 25 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 400, y: 100, width: 200, height: 20, axis: 'y', range: 150, speed: 2 },
+                    { x: 400, y: 530, width: 200, height: 20, axis: 'y', range: 150, speed: 2, phase: Math.PI }
+                ],
+                maxWells: 4,
+                launchAngle: 0,
+                launchPower: 4
+            },
+            {
+                name: "The Grid",
+                ball: { x: 80, y: 80 },
+                goal: { x: 920, y: 570, radius: 25 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 250, y: 200, width: 20, height: 80, axis: 'y', range: 200, speed: 2 },
+                    { x: 500, y: 350, width: 20, height: 80, axis: 'y', range: 200, speed: 2.5 },
+                    { x: 750, y: 200, width: 20, height: 80, axis: 'y', range: 200, speed: 3 },
+                    { x: 350, y: 150, width: 80, height: 20, axis: 'x', range: 150, speed: 2 },
+                    { x: 600, y: 450, width: 80, height: 20, axis: 'x', range: 150, speed: 2.5 }
+                ],
+                maxWells: 6,
+                launchAngle: 30,
+                launchPower: 4
+            },
+            // BOSS LEVEL 20
+            {
+                name: "BOSS: Chaos Engine",
+                ball: { x: 80, y: 325 },
+                goal: { x: 920, y: 325, radius: 20 },
+                obstacles: [
+                    { x: 200, y: 0, width: 15, height: 200 },
+                    { x: 200, y: 450, width: 15, height: 200 },
+                    { x: 800, y: 0, width: 15, height: 200 },
+                    { x: 800, y: 450, width: 15, height: 200 }
+                ],
+                movingObstacles: [
+                    { x: 350, y: 100, width: 25, height: 150, axis: 'y', range: 300, speed: 3 },
+                    { x: 500, y: 400, width: 25, height: 150, axis: 'y', range: 300, speed: 3.5 },
+                    { x: 650, y: 150, width: 25, height: 150, axis: 'y', range: 300, speed: 2.8 },
+                    { x: 300, y: 300, width: 100, height: 20, axis: 'x', range: 100, speed: 4 },
+                    { x: 600, y: 350, width: 100, height: 20, axis: 'x', range: 100, speed: 4 }
+                ],
+                maxWells: 7,
+                launchAngle: 0,
+                launchPower: 4,
+                isBoss: true
+            },
+
+            // ========== POD 3: EVENT HORIZON (21-30) - BLACK HOLES ==========
+            {
+                name: "Gravitational Pull",
+                ball: { x: 100, y: 350 },
+                goal: { x: 1000, y: 350, radius: 30 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 550, y: 350, radius: 40, strength: 300 }
+                ],
+                maxWells: 4,
+                launchAngle: 0,
+                launchPower: 6
+            },
+            {
+                name: "Slingshot",
+                ball: { x: 100, y: 600 },
+                goal: { x: 1000, y: 100, radius: 28 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 550, y: 350, radius: 35, strength: 350 }
+                ],
+                maxWells: 3,
+                launchAngle: -20,
+                launchPower: 5
+            },
+            {
+                name: "Twin Suns",
+                ball: { x: 100, y: 350 },
+                goal: { x: 1000, y: 350, radius: 28 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 400, y: 200, radius: 30, strength: 250 },
+                    { x: 700, y: 500, radius: 30, strength: 250 }
+                ],
+                maxWells: 5,
+                launchAngle: 0,
+                launchPower: 5
+            },
+            {
+                name: "Orbital Mechanics",
+                ball: { x: 550, y: 50 },
+                goal: { x: 550, y: 650, radius: 28 },
+                obstacles: [
+                    { x: 450, y: 300, width: 200, height: 20 }
+                ],
+                blackHoles: [
+                    { x: 300, y: 350, radius: 35, strength: 300 }
+                ],
+                maxWells: 4,
+                launchAngle: 90,
+                launchPower: 4
+            },
+            {
+                name: "The Void",
+                ball: { x: 100, y: 350 },
+                goal: { x: 1000, y: 350, radius: 25 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 550, y: 350, radius: 60, strength: 400 }
+                ],
+                maxWells: 5,
+                launchAngle: -30,
+                launchPower: 7
+            },
+            {
+                name: "Black Hole Alley",
+                ball: { x: 80, y: 350 },
+                goal: { x: 1020, y: 350, radius: 25 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 300, y: 200, radius: 25, strength: 200 },
+                    { x: 550, y: 500, radius: 25, strength: 200 },
+                    { x: 800, y: 200, radius: 25, strength: 200 }
+                ],
+                maxWells: 6,
+                launchAngle: 0,
+                launchPower: 5
+            },
+            {
+                name: "Escape Velocity",
+                ball: { x: 550, y: 650 },
+                goal: { x: 550, y: 50, radius: 25 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 550, y: 350, radius: 50, strength: 450 }
+                ],
+                maxWells: 5,
+                launchAngle: -90,
+                launchPower: 8
+            },
+            {
+                name: "Constellation",
+                ball: { x: 80, y: 80 },
+                goal: { x: 1020, y: 620, radius: 25 },
+                obstacles: [],
+                blackHoles: [
+                    { x: 300, y: 250, radius: 25, strength: 180 },
+                    { x: 550, y: 450, radius: 25, strength: 180 },
+                    { x: 800, y: 300, radius: 25, strength: 180 },
+                    { x: 450, y: 150, radius: 25, strength: 180 }
+                ],
+                maxWells: 6,
+                launchAngle: 30,
+                launchPower: 5
+            },
+            {
+                name: "Binary System",
+                ball: { x: 100, y: 350 },
+                goal: { x: 1000, y: 350, radius: 25 },
+                obstacles: [
+                    { x: 500, y: 0, width: 20, height: 250 },
+                    { x: 500, y: 450, width: 20, height: 250 }
+                ],
+                blackHoles: [
+                    { x: 350, y: 350, radius: 35, strength: 280 },
+                    { x: 750, y: 350, radius: 35, strength: 280 }
+                ],
+                maxWells: 5,
+                launchAngle: 0,
+                launchPower: 5
+            },
+            // BOSS LEVEL 30
+            {
+                name: "BOSS: Singularity",
+                ball: { x: 80, y: 350 },
+                goal: { x: 1020, y: 350, radius: 18 },
+                obstacles: [
+                    { x: 250, y: 0, width: 15, height: 280 },
+                    { x: 250, y: 420, width: 15, height: 280 },
+                    { x: 850, y: 0, width: 15, height: 280 },
+                    { x: 850, y: 420, width: 15, height: 280 }
+                ],
+                blackHoles: [
+                    { x: 550, y: 350, radius: 70, strength: 500 },
+                    { x: 400, y: 150, radius: 25, strength: 200 },
+                    { x: 700, y: 550, radius: 25, strength: 200 }
+                ],
+                maxWells: 8,
+                launchAngle: 0,
+                launchPower: 8,
+                isBoss: true
+            },
+
+            // ========== POD 4: PORTAL STORM (31-40) ==========
+            {
+                name: "First Jump",
+                ball: { x: 100, y: 375 },
+                goal: { x: 1100, y: 375, radius: 30 },
+                obstacles: [
+                    { x: 500, y: 0, width: 30, height: 750 }
+                ],
+                portals: [
+                    { x1: 400, y1: 375, x2: 600, y2: 375, radius: 25 }
+                ],
+                maxWells: 3,
+                launchAngle: 0,
+                launchPower: 5
+            },
+            {
+                name: "Chain Reaction",
+                ball: { x: 100, y: 650 },
+                goal: { x: 1100, y: 100, radius: 28 },
+                obstacles: [],
+                portals: [
+                    { x1: 350, y1: 550, x2: 550, y2: 200, radius: 25 },
+                    { x1: 750, y1: 300, x2: 950, y2: 150, radius: 25 }
+                ],
+                maxWells: 4,
+                launchAngle: -20,
+                launchPower: 5
+            },
+            {
+                name: "Wrong Way",
+                ball: { x: 1100, y: 375 },
+                goal: { x: 100, y: 375, radius: 28 },
+                obstacles: [
+                    { x: 300, y: 0, width: 20, height: 300 },
+                    { x: 300, y: 450, width: 20, height: 300 }
+                ],
+                portals: [
+                    { x1: 200, y1: 375, x2: 1000, y2: 200, radius: 25 }
+                ],
+                maxWells: 4,
+                launchAngle: 180,
+                launchPower: 5
+            },
+            {
+                name: "Triangle",
+                ball: { x: 600, y: 700 },
+                goal: { x: 600, y: 50, radius: 25 },
+                obstacles: [],
+                portals: [
+                    { x1: 200, y1: 500, x2: 1000, y2: 500, radius: 25 },
+                    { x1: 300, y1: 200, x2: 900, y2: 200, radius: 25 }
+                ],
+                maxWells: 5,
+                launchAngle: -90,
+                launchPower: 4
+            },
+            {
+                name: "Maze Warp",
+                ball: { x: 80, y: 100 },
+                goal: { x: 1120, y: 650, radius: 25 },
+                obstacles: [
+                    { x: 300, y: 0, width: 20, height: 500 },
+                    { x: 600, y: 250, width: 20, height: 500 },
+                    { x: 900, y: 0, width: 20, height: 500 }
+                ],
+                portals: [
+                    { x1: 200, y1: 400, x2: 450, y2: 600, radius: 22 },
+                    { x1: 500, y1: 150, x2: 750, y2: 650, radius: 22 }
+                ],
+                maxWells: 5,
+                launchAngle: 45,
+                launchPower: 4
+            },
+            {
+                name: "Reflection",
+                ball: { x: 100, y: 375 },
+                goal: { x: 1100, y: 375, radius: 25 },
+                obstacles: [
+                    { x: 550, y: 200, width: 100, height: 350 }
+                ],
+                portals: [
+                    { x1: 300, y1: 150, x2: 300, y2: 600, radius: 25 },
+                    { x1: 900, y1: 150, x2: 900, y2: 600, radius: 25 }
+                ],
+                maxWells: 4,
+                launchAngle: -30,
+                launchPower: 5
+            },
+            {
+                name: "Four Corners",
+                ball: { x: 600, y: 375 },
+                goal: { x: 1050, y: 375, radius: 25 },
+                obstacles: [
+                    { x: 400, y: 275, width: 400, height: 200 }
+                ],
+                portals: [
+                    { x1: 150, y1: 100, x2: 1050, y2: 650, radius: 22 },
+                    { x1: 150, y1: 650, x2: 1050, y2: 100, radius: 22 }
+                ],
+                maxWells: 5,
+                launchAngle: 180,
+                launchPower: 4
+            },
+            {
+                name: "Stairway",
+                ball: { x: 80, y: 700 },
+                goal: { x: 1120, y: 50, radius: 25 },
+                obstacles: [],
+                portals: [
+                    { x1: 200, y1: 600, x2: 400, y2: 450, radius: 22 },
+                    { x1: 500, y1: 350, x2: 700, y2: 250, radius: 22 },
+                    { x1: 800, y1: 150, x2: 1000, y2: 100, radius: 22 }
+                ],
+                maxWells: 4,
+                launchAngle: -30,
+                launchPower: 5
+            },
+            {
+                name: "Loop de Loop",
+                ball: { x: 100, y: 375 },
+                goal: { x: 300, y: 375, radius: 25 },
+                obstacles: [
+                    { x: 200, y: 200, width: 20, height: 350 }
+                ],
+                portals: [
+                    { x1: 150, y1: 375, x2: 1050, y2: 375, radius: 25 }
+                ],
+                maxWells: 3,
+                launchAngle: 0,
+                launchPower: 4
+            },
+            // BOSS LEVEL 40
+            {
+                name: "BOSS: Dimension Rift",
+                ball: { x: 80, y: 375 },
+                goal: { x: 1120, y: 375, radius: 18 },
+                obstacles: [
+                    { x: 250, y: 0, width: 15, height: 300 },
+                    { x: 250, y: 450, width: 15, height: 300 },
+                    { x: 600, y: 150, width: 15, height: 250 },
+                    { x: 600, y: 500, width: 15, height: 250 },
+                    { x: 950, y: 0, width: 15, height: 300 },
+                    { x: 950, y: 450, width: 15, height: 300 }
+                ],
+                portals: [
+                    { x1: 150, y1: 200, x2: 400, y2: 600, radius: 20 },
+                    { x1: 500, y1: 100, x2: 750, y2: 650, radius: 20 },
+                    { x1: 850, y1: 200, x2: 1050, y2: 500, radius: 20 }
+                ],
+                maxWells: 7,
+                launchAngle: 0,
+                launchPower: 4,
+                isBoss: true
+            },
+
+            // ========== POD 5: PINBALL WIZARD (41-50) - BUMPERS ==========
+            {
+                name: "First Bounce",
+                ball: { x: 100, y: 400 },
+                goal: { x: 1200, y: 400, radius: 30 },
+                obstacles: [],
+                bumpers: [
+                    { x: 650, y: 400, radius: 40 }
+                ],
+                maxWells: 3,
+                launchAngle: 0,
+                launchPower: 4
+            },
+            {
+                name: "Ricochet",
+                ball: { x: 100, y: 700 },
+                goal: { x: 1200, y: 100, radius: 28 },
+                obstacles: [],
+                bumpers: [
+                    { x: 400, y: 500, radius: 35 },
+                    { x: 800, y: 300, radius: 35 }
+                ],
+                maxWells: 4,
+                launchAngle: -30,
+                launchPower: 4
+            },
+            {
+                name: "Bumper Alley",
+                ball: { x: 100, y: 400 },
+                goal: { x: 1200, y: 400, radius: 28 },
+                obstacles: [],
+                bumpers: [
+                    { x: 350, y: 300, radius: 30 },
+                    { x: 550, y: 500, radius: 30 },
+                    { x: 750, y: 300, radius: 30 },
+                    { x: 950, y: 500, radius: 30 }
+                ],
+                maxWells: 5,
+                launchAngle: 0,
+                launchPower: 3
+            },
+            {
+                name: "Pinball Classic",
+                ball: { x: 650, y: 750 },
+                goal: { x: 650, y: 50, radius: 28 },
+                obstacles: [
+                    { x: 0, y: 400, width: 300, height: 20 },
+                    { x: 1000, y: 400, width: 300, height: 20 }
+                ],
+                bumpers: [
+                    { x: 400, y: 300, radius: 35 },
+                    { x: 650, y: 450, radius: 35 },
+                    { x: 900, y: 300, radius: 35 },
+                    { x: 550, y: 200, radius: 25 },
+                    { x: 750, y: 200, radius: 25 }
+                ],
+                maxWells: 5,
+                launchAngle: -90,
+                launchPower: 5
+            },
+            {
+                name: "The Gauntlet",
+                ball: { x: 80, y: 400 },
+                goal: { x: 1220, y: 400, radius: 25 },
+                obstacles: [
+                    { x: 600, y: 0, width: 20, height: 300 },
+                    { x: 600, y: 500, width: 20, height: 300 }
+                ],
+                bumpers: [
+                    { x: 300, y: 250, radius: 30 },
+                    { x: 300, y: 550, radius: 30 },
+                    { x: 500, y: 400, radius: 40 },
+                    { x: 800, y: 400, radius: 40 },
+                    { x: 1000, y: 250, radius: 30 },
+                    { x: 1000, y: 550, radius: 30 }
                 ],
                 maxWells: 6,
                 launchAngle: 0,
                 launchPower: 4
             },
             {
-                name: "Pinball",
-                ball: { x: 100, y: 550 },
-                goal: { x: 800, y: 50, radius: 25 },
-                obstacles: [
-                    { x: 250, y: 100, width: 80, height: 20 },
-                    { x: 450, y: 200, width: 80, height: 20 },
-                    { x: 250, y: 300, width: 80, height: 20 },
-                    { x: 450, y: 400, width: 80, height: 20 },
-                    { x: 650, y: 300, width: 80, height: 20 }
+                name: "Multiball",
+                ball: { x: 650, y: 400 },
+                goal: { x: 1200, y: 700, radius: 25 },
+                obstacles: [],
+                bumpers: [
+                    { x: 500, y: 400, radius: 25 },
+                    { x: 800, y: 400, radius: 25 },
+                    { x: 650, y: 250, radius: 25 },
+                    { x: 650, y: 550, radius: 25 },
+                    { x: 400, y: 250, radius: 30 },
+                    { x: 900, y: 550, radius: 30 }
                 ],
                 maxWells: 5,
-                launchAngle: -45,
-                launchPower: 6
-            },
-            {
-                name: "Orbit",
-                ball: { x: 450, y: 100 },
-                goal: { x: 450, y: 500, radius: 25 },
-                obstacles: [
-                    { x: 350, y: 250, width: 200, height: 100 }
-                ],
-                maxWells: 3,
                 launchAngle: 45,
-                launchPower: 5,
-                hint: "Try creating an orbit around the obstacle"
+                launchPower: 4
             },
             {
-                name: "Tight Squeeze",
-                ball: { x: 50, y: 50 },
-                goal: { x: 850, y: 550, radius: 20 },
-                obstacles: [
-                    { x: 150, y: 100, width: 600, height: 20 },
-                    { x: 150, y: 200, width: 20, height: 300 },
-                    { x: 250, y: 200, width: 500, height: 20 },
-                    { x: 730, y: 200, width: 20, height: 200 },
-                    { x: 250, y: 380, width: 500, height: 20 },
-                    { x: 250, y: 380, width: 20, height: 150 }
+                name: "Cascade",
+                ball: { x: 100, y: 100 },
+                goal: { x: 1200, y: 700, radius: 25 },
+                obstacles: [],
+                bumpers: [
+                    { x: 300, y: 200, radius: 30 },
+                    { x: 500, y: 350, radius: 30 },
+                    { x: 700, y: 250, radius: 30 },
+                    { x: 900, y: 400, radius: 30 },
+                    { x: 1100, y: 550, radius: 30 }
+                ],
+                maxWells: 5,
+                launchAngle: 30,
+                launchPower: 4
+            },
+            {
+                name: "Fortress",
+                ball: { x: 100, y: 400 },
+                goal: { x: 650, y: 400, radius: 25 },
+                obstacles: [],
+                bumpers: [
+                    { x: 650, y: 200, radius: 35 },
+                    { x: 650, y: 600, radius: 35 },
+                    { x: 450, y: 400, radius: 35 },
+                    { x: 850, y: 400, radius: 35 },
+                    { x: 550, y: 300, radius: 25 },
+                    { x: 750, y: 300, radius: 25 },
+                    { x: 550, y: 500, radius: 25 },
+                    { x: 750, y: 500, radius: 25 }
                 ],
                 maxWells: 6,
                 launchAngle: 0,
-                launchPower: 3
+                launchPower: 5
             },
             {
-                name: "Grand Finale",
-                ball: { x: 50, y: 300 },
-                goal: { x: 850, y: 300, radius: 20 },
+                name: "Speed Run",
+                ball: { x: 80, y: 750 },
+                goal: { x: 1220, y: 50, radius: 25 },
+                obstacles: [],
+                bumpers: [
+                    { x: 250, y: 600, radius: 30 },
+                    { x: 450, y: 450, radius: 30 },
+                    { x: 650, y: 300, radius: 30 },
+                    { x: 850, y: 450, radius: 30 },
+                    { x: 1050, y: 200, radius: 30 }
+                ],
+                maxWells: 5,
+                launchAngle: -45,
+                launchPower: 5
+            },
+            // BOSS LEVEL 50
+            {
+                name: "BOSS: Pinball Pandemonium",
+                ball: { x: 80, y: 400 },
+                goal: { x: 1220, y: 400, radius: 18 },
                 obstacles: [
-                    { x: 200, y: 0, width: 15, height: 250 },
-                    { x: 200, y: 350, width: 15, height: 250 },
-                    { x: 350, y: 100, width: 15, height: 200 },
-                    { x: 350, y: 400, width: 15, height: 200 },
-                    { x: 500, y: 0, width: 15, height: 200 },
-                    { x: 500, y: 300, width: 15, height: 100 },
-                    { x: 500, y: 500, width: 15, height: 100 },
-                    { x: 650, y: 150, width: 15, height: 300 },
-                    { x: 750, y: 0, width: 15, height: 200 },
-                    { x: 750, y: 400, width: 15, height: 200 }
+                    { x: 400, y: 0, width: 15, height: 300 },
+                    { x: 400, y: 500, width: 15, height: 300 },
+                    { x: 900, y: 0, width: 15, height: 300 },
+                    { x: 900, y: 500, width: 15, height: 300 }
+                ],
+                bumpers: [
+                    { x: 250, y: 300, radius: 35 },
+                    { x: 250, y: 500, radius: 35 },
+                    { x: 550, y: 400, radius: 40 },
+                    { x: 650, y: 200, radius: 30 },
+                    { x: 650, y: 600, radius: 30 },
+                    { x: 750, y: 400, radius: 40 },
+                    { x: 1050, y: 300, radius: 35 },
+                    { x: 1050, y: 500, radius: 35 }
                 ],
                 maxWells: 8,
                 launchAngle: 0,
-                launchPower: 3
+                launchPower: 4,
+                isBoss: true
+            },
+
+            // ========== POD 6: THE GAUNTLET - CHALLENGE LEVELS (51-60) ==========
+            {
+                name: "Challenge: Everything",
+                ball: { x: 100, y: 450 },
+                goal: { x: 1400, y: 450, radius: 28 },
+                obstacles: [
+                    { x: 500, y: 0, width: 20, height: 350 },
+                    { x: 1000, y: 550, width: 20, height: 350 }
+                ],
+                movingObstacles: [
+                    { x: 300, y: 200, width: 25, height: 100, axis: 'y', range: 400, speed: 2.5 }
+                ],
+                blackHoles: [
+                    { x: 750, y: 450, radius: 35, strength: 250 }
+                ],
+                portals: [
+                    { x1: 600, y1: 600, x2: 900, y2: 200, radius: 22 }
+                ],
+                bumpers: [
+                    { x: 1200, y: 350, radius: 30 },
+                    { x: 1200, y: 550, radius: 30 }
+                ],
+                maxWells: 6,
+                launchAngle: 0,
+                launchPower: 5,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: Chaos Theory",
+                ball: { x: 750, y: 850 },
+                goal: { x: 750, y: 50, radius: 25 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 300, y: 300, width: 150, height: 20, axis: 'x', range: 250, speed: 3 },
+                    { x: 1050, y: 500, width: 150, height: 20, axis: 'x', range: 250, speed: 3 }
+                ],
+                blackHoles: [
+                    { x: 400, y: 600, radius: 30, strength: 200 },
+                    { x: 1100, y: 300, radius: 30, strength: 200 }
+                ],
+                bumpers: [
+                    { x: 600, y: 450, radius: 35 },
+                    { x: 900, y: 450, radius: 35 }
+                ],
+                maxWells: 7,
+                launchAngle: -90,
+                launchPower: 5,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: Portal Madness",
+                ball: { x: 100, y: 100 },
+                goal: { x: 1400, y: 800, radius: 25 },
+                obstacles: [
+                    { x: 400, y: 300, width: 300, height: 20 },
+                    { x: 800, y: 580, width: 300, height: 20 }
+                ],
+                portals: [
+                    { x1: 300, y1: 200, x2: 600, y2: 500, radius: 22 },
+                    { x1: 700, y1: 400, x2: 1000, y2: 700, radius: 22 },
+                    { x1: 1100, y1: 300, x2: 1300, y2: 750, radius: 22 }
+                ],
+                blackHoles: [
+                    { x: 500, y: 700, radius: 35, strength: 280 }
+                ],
+                bumpers: [
+                    { x: 900, y: 200, radius: 30 }
+                ],
+                maxWells: 7,
+                launchAngle: 30,
+                launchPower: 4,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: Black Hole Sun",
+                ball: { x: 100, y: 450 },
+                goal: { x: 1400, y: 450, radius: 25 },
+                obstacles: [
+                    { x: 350, y: 0, width: 15, height: 350 },
+                    { x: 350, y: 550, width: 15, height: 350 },
+                    { x: 1150, y: 0, width: 15, height: 350 },
+                    { x: 1150, y: 550, width: 15, height: 350 }
+                ],
+                blackHoles: [
+                    { x: 750, y: 450, radius: 60, strength: 400 },
+                    { x: 500, y: 200, radius: 30, strength: 200 },
+                    { x: 500, y: 700, radius: 30, strength: 200 },
+                    { x: 1000, y: 200, radius: 30, strength: 200 },
+                    { x: 1000, y: 700, radius: 30, strength: 200 }
+                ],
+                movingObstacles: [
+                    { x: 250, y: 350, width: 20, height: 80, axis: 'y', range: 150, speed: 2 }
+                ],
+                maxWells: 8,
+                launchAngle: 0,
+                launchPower: 7,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: Bumper Kingdom",
+                ball: { x: 100, y: 450 },
+                goal: { x: 1400, y: 450, radius: 25 },
+                obstacles: [
+                    { x: 700, y: 300, width: 100, height: 300 }
+                ],
+                bumpers: [
+                    { x: 300, y: 300, radius: 35 },
+                    { x: 300, y: 600, radius: 35 },
+                    { x: 500, y: 450, radius: 40 },
+                    { x: 900, y: 200, radius: 35 },
+                    { x: 900, y: 700, radius: 35 },
+                    { x: 1100, y: 350, radius: 30 },
+                    { x: 1100, y: 550, radius: 30 },
+                    { x: 1250, y: 450, radius: 35 }
+                ],
+                portals: [
+                    { x1: 600, y1: 150, x2: 850, y2: 750, radius: 22 }
+                ],
+                movingObstacles: [
+                    { x: 400, y: 150, width: 100, height: 20, axis: 'y', range: 100, speed: 2 }
+                ],
+                maxWells: 7,
+                launchAngle: 0,
+                launchPower: 4,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: The Labyrinth",
+                ball: { x: 80, y: 80 },
+                goal: { x: 1420, y: 820, radius: 22 },
+                obstacles: [
+                    { x: 200, y: 0, width: 15, height: 700 },
+                    { x: 400, y: 200, width: 15, height: 700 },
+                    { x: 600, y: 0, width: 15, height: 600 },
+                    { x: 800, y: 300, width: 15, height: 600 },
+                    { x: 1000, y: 0, width: 15, height: 700 },
+                    { x: 1200, y: 200, width: 15, height: 700 }
+                ],
+                portals: [
+                    { x1: 100, y1: 600, x2: 300, y2: 100, radius: 20 },
+                    { x1: 500, y1: 750, x2: 700, y2: 150, radius: 20 },
+                    { x1: 900, y1: 800, x2: 1100, y2: 100, radius: 20 }
+                ],
+                blackHoles: [
+                    { x: 300, y: 450, radius: 25, strength: 180 },
+                    { x: 700, y: 450, radius: 25, strength: 180 },
+                    { x: 1100, y: 450, radius: 25, strength: 180 }
+                ],
+                maxWells: 8,
+                launchAngle: 45,
+                launchPower: 4,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: TemporalRift",
+                ball: { x: 750, y: 450 },
+                goal: { x: 100, y: 450, radius: 22 },
+                obstacles: [],
+                movingObstacles: [
+                    { x: 300, y: 200, width: 25, height: 120, axis: 'y', range: 400, speed: 3 },
+                    { x: 600, y: 500, width: 25, height: 120, axis: 'y', range: 400, speed: 3.5 },
+                    { x: 900, y: 150, width: 25, height: 120, axis: 'y', range: 400, speed: 2.5 },
+                    { x: 1200, y: 400, width: 25, height: 120, axis: 'y', range: 400, speed: 4 }
+                ],
+                portals: [
+                    { x1: 650, y1: 450, x2: 1350, y2: 450, radius: 25 }
+                ],
+                blackHoles: [
+                    { x: 450, y: 300, radius: 30, strength: 220 },
+                    { x: 1050, y: 600, radius: 30, strength: 220 }
+                ],
+                bumpers: [
+                    { x: 200, y: 300, radius: 30 },
+                    { x: 200, y: 600, radius: 30 }
+                ],
+                maxWells: 8,
+                launchAngle: 180,
+                launchPower: 5,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: Orbit Trap",
+                ball: { x: 750, y: 850 },
+                goal: { x: 750, y: 50, radius: 22 },
+                obstacles: [
+                    { x: 600, y: 350, width: 300, height: 200 }
+                ],
+                blackHoles: [
+                    { x: 750, y: 450, radius: 50, strength: 350 }
+                ],
+                bumpers: [
+                    { x: 400, y: 300, radius: 35 },
+                    { x: 400, y: 600, radius: 35 },
+                    { x: 1100, y: 300, radius: 35 },
+                    { x: 1100, y: 600, radius: 35 }
+                ],
+                portals: [
+                    { x1: 250, y1: 450, x2: 1250, y2: 450, radius: 25 }
+                ],
+                movingObstacles: [
+                    { x: 550, y: 150, width: 100, height: 20, axis: 'x', range: 200, speed: 3 },
+                    { x: 850, y: 700, width: 100, height: 20, axis: 'x', range: 200, speed: 3 }
+                ],
+                maxWells: 8,
+                launchAngle: -90,
+                launchPower: 6,
+                isChallenge: true
+            },
+            {
+                name: "Challenge: Singularity Storm",
+                ball: { x: 100, y: 450 },
+                goal: { x: 1400, y: 450, radius: 20 },
+                obstacles: [
+                    { x: 300, y: 0, width: 15, height: 350 },
+                    { x: 300, y: 550, width: 15, height: 350 },
+                    { x: 700, y: 200, width: 15, height: 250 },
+                    { x: 700, y: 550, width: 15, height: 250 },
+                    { x: 1100, y: 0, width: 15, height: 350 },
+                    { x: 1100, y: 550, width: 15, height: 350 }
+                ],
+                blackHoles: [
+                    { x: 500, y: 450, radius: 45, strength: 350 },
+                    { x: 900, y: 450, radius: 45, strength: 350 }
+                ],
+                movingObstacles: [
+                    { x: 400, y: 350, width: 20, height: 60, axis: 'y', range: 150, speed: 2.5 },
+                    { x: 800, y: 500, width: 20, height: 60, axis: 'y', range: 150, speed: 2.5 },
+                    { x: 1200, y: 350, width: 20, height: 60, axis: 'y', range: 150, speed: 2.5 }
+                ],
+                portals: [
+                    { x1: 200, y1: 200, x2: 600, y2: 700, radius: 20 },
+                    { x1: 1000, y1: 200, x2: 1300, y2: 650, radius: 20 }
+                ],
+                bumpers: [
+                    { x: 200, y: 450, radius: 25 },
+                    { x: 1300, y: 300, radius: 25 },
+                    { x: 1300, y: 600, radius: 25 }
+                ],
+                maxWells: 9,
+                launchAngle: 0,
+                launchPower: 7,
+                isChallenge: true
+            },
+            // FINAL BOSS LEVEL 60
+            {
+                name: "FINAL: The Impossibility",
+                ball: { x: 80, y: 450 },
+                goal: { x: 1420, y: 450, radius: 18 },
+                obstacles: [
+                    { x: 250, y: 0, width: 12, height: 380 },
+                    { x: 250, y: 520, width: 12, height: 380 },
+                    { x: 500, y: 150, width: 12, height: 300 },
+                    { x: 500, y: 550, width: 12, height: 300 },
+                    { x: 750, y: 0, width: 12, height: 400 },
+                    { x: 750, y: 500, width: 12, height: 400 },
+                    { x: 1000, y: 100, width: 12, height: 350 },
+                    { x: 1000, y: 550, width: 12, height: 350 },
+                    { x: 1250, y: 0, width: 12, height: 380 },
+                    { x: 1250, y: 520, width: 12, height: 380 }
+                ],
+                movingObstacles: [
+                    { x: 350, y: 380, width: 20, height: 50, axis: 'y', range: 100, speed: 2 },
+                    { x: 600, y: 450, width: 20, height: 50, axis: 'y', range: 100, speed: 2.5 },
+                    { x: 850, y: 400, width: 20, height: 50, axis: 'y', range: 100, speed: 2 },
+                    { x: 1100, y: 450, width: 20, height: 50, axis: 'y', range: 100, speed: 2.5 }
+                ],
+                blackHoles: [
+                    { x: 400, y: 250, radius: 30, strength: 220 },
+                    { x: 650, y: 650, radius: 30, strength: 220 },
+                    { x: 900, y: 250, radius: 30, strength: 220 },
+                    { x: 1150, y: 650, radius: 30, strength: 220 }
+                ],
+                portals: [
+                    { x1: 150, y1: 200, x2: 300, y2: 700, radius: 18 },
+                    { x1: 550, y1: 100, x2: 700, y2: 800, radius: 18 },
+                    { x1: 950, y1: 100, x2: 1100, y2: 800, radius: 18 },
+                    { x1: 1350, y1: 200, x2: 1350, y2: 700, radius: 18 }
+                ],
+                bumpers: [
+                    { x: 180, y: 450, radius: 25 },
+                    { x: 420, y: 450, radius: 25 },
+                    { x: 680, y: 450, radius: 25 },
+                    { x: 820, y: 450, radius: 25 },
+                    { x: 1080, y: 450, radius: 25 },
+                    { x: 1320, y: 450, radius: 25 }
+                ],
+                maxWells: 10,
+                launchAngle: 0,
+                launchPower: 6,
+                isBoss: true,
+                isChallenge: true
             }
         ];
 
@@ -414,10 +1400,10 @@
                 this.launched = true;
             }
 
-            update(wells) {
+            update(wells, blackHoles) {
                 if (!this.launched) return;
 
-                // Apply gravity from wells
+                // Apply gravity from player wells
                 for (const well of wells) {
                     const dx = well.x - this.x;
                     const dy = well.y - this.y;
@@ -425,6 +1411,19 @@
 
                     if (dist > 10) {
                         const force = well.strength / (dist * dist) * (well.type === 'attractor' ? 1 : -1);
+                        this.vx += (dx / dist) * force;
+                        this.vy += (dy / dist) * force;
+                    }
+                }
+
+                // Apply gravity from black holes
+                for (const bh of blackHoles) {
+                    const dx = bh.x - this.x;
+                    const dy = bh.y - this.y;
+                    const dist = Math.sqrt(dx * dx + dy * dy);
+
+                    if (dist > 10) {
+                        const force = bh.strength / (dist * dist);
                         this.vx += (dx / dist) * force;
                         this.vy += (dy / dist) * force;
                     }
@@ -465,7 +1464,6 @@
             }
 
             draw() {
-                // Glow effect
                 const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, this.radius * 2);
                 gradient.addColorStop(0, 'rgba(255, 255, 255, 0.8)');
                 gradient.addColorStop(0.5, 'rgba(200, 200, 255, 0.4)');
@@ -476,7 +1474,6 @@
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
-                // Ball
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
                 ctx.fillStyle = '#fff';
@@ -509,7 +1506,6 @@
                                      (PHYSICS.wellStrengthMax - PHYSICS.wellStrengthMin);
                 const fieldRadius = 50 + strengthRatio * 100;
 
-                // Field visualization
                 const gradient = ctx.createRadialGradient(this.x, this.y, 0, this.x, this.y, fieldRadius);
                 if (this.type === 'attractor') {
                     gradient.addColorStop(0, 'rgba(100, 150, 255, 0.3)');
@@ -524,20 +1520,17 @@
                 ctx.fillStyle = gradient;
                 ctx.fill();
 
-                // Core
                 ctx.beginPath();
                 ctx.arc(this.x, this.y, visualRadius, 0, Math.PI * 2);
                 ctx.fillStyle = this.type === 'attractor' ? '#4a9eff' : '#ff6b6b';
                 ctx.fill();
 
-                // Symbol
                 ctx.fillStyle = '#fff';
                 ctx.font = 'bold 16px Arial';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
                 ctx.fillText(this.type === 'attractor' ? '+' : '-', this.x, this.y);
 
-                // Strength indicator
                 ctx.font = '10px Arial';
                 ctx.fillStyle = 'rgba(255,255,255,0.7)';
                 ctx.fillText(Math.round(this.strength), this.x, this.y + visualRadius + 12);
@@ -553,19 +1546,51 @@
         // ============================================
         // GAME FUNCTIONS
         // ============================================
+        function getPod(levelIndex) {
+            return Math.floor(levelIndex / 10);
+        }
+
+        function resizeCanvas(levelIndex) {
+            const pod = getPod(levelIndex);
+            const size = CANVAS_SIZES[pod] || CANVAS_SIZES[5];
+            canvas.width = size.width;
+            canvas.height = size.height;
+        }
+
         function loadLevel(index) {
             const level = levels[index];
             state.currentLevel = index;
+
+            resizeCanvas(index);
+
             state.ball = new Ball(level.ball.x, level.ball.y);
             state.goal = { ...level.goal };
-            state.obstacles = level.obstacles.map(o => ({ ...o }));
+            state.obstacles = (level.obstacles || []).map(o => ({ ...o }));
+            state.movingObstacles = (level.movingObstacles || []).map(o => ({
+                ...o,
+                originalX: o.x,
+                originalY: o.y,
+                phase: o.phase || 0
+            }));
+            state.blackHoles = (level.blackHoles || []).map(bh => ({ ...bh }));
+            state.portals = (level.portals || []).map(p => ({ ...p }));
+            state.bumpers = (level.bumpers || []).map(b => ({ ...b }));
             state.wells = [];
             state.maxWells = level.maxWells;
             state.ballLaunched = false;
             state.gameOver = false;
             state.trail = [];
+            state.gameTime = 0;
+            state.lastTime = 0;
+            state.accumulator = 0;
 
             document.getElementById('currentLevel').textContent = index + 1;
+
+            // Hide instructions after first level
+            const instructions = document.getElementById('instructions');
+            instructions.style.display = index > 0 ? 'none' : 'block';
+            document.getElementById('podName').textContent = POD_NAMES[getPod(index)];
+            document.getElementById('obstacleHint').innerHTML = POD_HINTS[getPod(index)];
             updateWellCounter();
             hideMessage();
         }
@@ -576,6 +1601,18 @@
             state.ballLaunched = false;
             state.gameOver = false;
             state.trail = [];
+            state.gameTime = 0;
+            state.lastTime = 0;
+            state.accumulator = 0;
+
+            // Reset moving obstacles
+            state.movingObstacles = (level.movingObstacles || []).map(o => ({
+                ...o,
+                originalX: o.x,
+                originalY: o.y,
+                phase: o.phase || 0
+            }));
+
             hideMessage();
         }
 
@@ -587,23 +1624,94 @@
             state.ballLaunched = true;
         }
 
+        function updateMovingObstacles() {
+            for (const obs of state.movingObstacles) {
+                const offset = Math.sin(state.gameTime * obs.speed * 0.01 + (obs.phase || 0)) * obs.range / 2;
+                if (obs.axis === 'x') {
+                    obs.x = obs.originalX + offset;
+                } else {
+                    obs.y = obs.originalY + offset;
+                }
+            }
+        }
+
+        function checkPortalCollision() {
+            for (const portal of state.portals) {
+                const dx1 = state.ball.x - portal.x1;
+                const dy1 = state.ball.y - portal.y1;
+                const dist1 = Math.sqrt(dx1 * dx1 + dy1 * dy1);
+
+                if (dist1 < state.ball.radius + portal.radius) {
+                    state.ball.x = portal.x2;
+                    state.ball.y = portal.y2;
+                    return;
+                }
+
+                const dx2 = state.ball.x - portal.x2;
+                const dy2 = state.ball.y - portal.y2;
+                const dist2 = Math.sqrt(dx2 * dx2 + dy2 * dy2);
+
+                if (dist2 < state.ball.radius + portal.radius) {
+                    state.ball.x = portal.x1;
+                    state.ball.y = portal.y1;
+                    return;
+                }
+            }
+        }
+
+        function checkBumperCollision() {
+            for (const bumper of state.bumpers) {
+                const dx = state.ball.x - bumper.x;
+                const dy = state.ball.y - bumper.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < state.ball.radius + bumper.radius) {
+                    // Bounce off bumper
+                    const nx = dx / dist;
+                    const ny = dy / dist;
+
+                    // Move ball outside bumper
+                    state.ball.x = bumper.x + nx * (state.ball.radius + bumper.radius + 1);
+                    state.ball.y = bumper.y + ny * (state.ball.radius + bumper.radius + 1);
+
+                    // Reflect velocity and add force
+                    const dot = state.ball.vx * nx + state.ball.vy * ny;
+                    state.ball.vx = (state.ball.vx - 2 * dot * nx) + nx * PHYSICS.bumperForce;
+                    state.ball.vy = (state.ball.vy - 2 * dot * ny) + ny * PHYSICS.bumperForce;
+                }
+            }
+        }
+
         function checkCollisions() {
             if (state.gameOver) return;
 
             const ball = state.ball;
 
             // Check goal
-            const dx = ball.x - state.goal.x;
-            const dy = ball.y - state.goal.y;
-            const dist = Math.sqrt(dx * dx + dy * dy);
+            const gdx = ball.x - state.goal.x;
+            const gdy = ball.y - state.goal.y;
+            const gDist = Math.sqrt(gdx * gdx + gdy * gdy);
 
-            if (dist < ball.radius + state.goal.radius) {
+            if (gDist < ball.radius + state.goal.radius) {
                 state.gameOver = true;
                 onWin();
                 return;
             }
 
-            // Check obstacles
+            // Check black holes (instant death)
+            for (const bh of state.blackHoles) {
+                const dx = ball.x - bh.x;
+                const dy = ball.y - bh.y;
+                const dist = Math.sqrt(dx * dx + dy * dy);
+
+                if (dist < ball.radius + bh.radius) {
+                    state.gameOver = true;
+                    onFail();
+                    return;
+                }
+            }
+
+            // Check static obstacles
             for (const obs of state.obstacles) {
                 if (ball.x + ball.radius > obs.x &&
                     ball.x - ball.radius < obs.x + obs.width &&
@@ -614,6 +1722,24 @@
                     return;
                 }
             }
+
+            // Check moving obstacles
+            for (const obs of state.movingObstacles) {
+                if (ball.x + ball.radius > obs.x &&
+                    ball.x - ball.radius < obs.x + obs.width &&
+                    ball.y + ball.radius > obs.y &&
+                    ball.y - ball.radius < obs.y + obs.height) {
+                    state.gameOver = true;
+                    onFail();
+                    return;
+                }
+            }
+
+            // Check portals
+            checkPortalCollision();
+
+            // Check bumpers
+            checkBumperCollision();
 
             // Check if ball stopped
             if (ball.launched && ball.isStopped()) {
@@ -661,7 +1787,6 @@
         function drawGoal() {
             const goal = state.goal;
 
-            // Outer glow
             const gradient = ctx.createRadialGradient(goal.x, goal.y, 0, goal.x, goal.y, goal.radius * 1.5);
             gradient.addColorStop(0, 'rgba(74, 222, 128, 0.6)');
             gradient.addColorStop(1, 'rgba(74, 222, 128, 0)');
@@ -671,14 +1796,12 @@
             ctx.fillStyle = gradient;
             ctx.fill();
 
-            // Goal circle
             ctx.beginPath();
             ctx.arc(goal.x, goal.y, goal.radius, 0, Math.PI * 2);
             ctx.strokeStyle = '#4ade80';
             ctx.lineWidth = 3;
             ctx.stroke();
 
-            // Inner circle
             ctx.beginPath();
             ctx.arc(goal.x, goal.y, goal.radius * 0.5, 0, Math.PI * 2);
             ctx.fillStyle = 'rgba(74, 222, 128, 0.3)';
@@ -686,20 +1809,142 @@
         }
 
         function drawObstacles() {
+            // Static obstacles
             for (const obs of state.obstacles) {
-                // Glow
                 ctx.shadowColor = '#ff4444';
                 ctx.shadowBlur = 15;
-
                 ctx.fillStyle = '#ff4444';
                 ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
-
                 ctx.shadowBlur = 0;
-
-                // Border
                 ctx.strokeStyle = '#ff6666';
                 ctx.lineWidth = 2;
                 ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+            }
+
+            // Moving obstacles
+            for (const obs of state.movingObstacles) {
+                ctx.shadowColor = '#ffaa00';
+                ctx.shadowBlur = 15;
+                ctx.fillStyle = '#ffaa00';
+                ctx.fillRect(obs.x, obs.y, obs.width, obs.height);
+                ctx.shadowBlur = 0;
+                ctx.strokeStyle = '#ffcc44';
+                ctx.lineWidth = 2;
+                ctx.strokeRect(obs.x, obs.y, obs.width, obs.height);
+            }
+        }
+
+        function drawBlackHoles() {
+            for (const bh of state.blackHoles) {
+                // Accretion disk effect
+                const gradient = ctx.createRadialGradient(bh.x, bh.y, bh.radius * 0.5, bh.x, bh.y, bh.radius * 3);
+                gradient.addColorStop(0, 'rgba(0, 0, 0, 1)');
+                gradient.addColorStop(0.3, 'rgba(80, 0, 120, 0.8)');
+                gradient.addColorStop(0.6, 'rgba(120, 0, 180, 0.4)');
+                gradient.addColorStop(1, 'rgba(80, 0, 120, 0)');
+
+                ctx.beginPath();
+                ctx.arc(bh.x, bh.y, bh.radius * 3, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Event horizon
+                ctx.beginPath();
+                ctx.arc(bh.x, bh.y, bh.radius, 0, Math.PI * 2);
+                ctx.fillStyle = '#000';
+                ctx.fill();
+                ctx.strokeStyle = '#8800ff';
+                ctx.lineWidth = 2;
+                ctx.stroke();
+
+                // Singularity
+                ctx.beginPath();
+                ctx.arc(bh.x, bh.y, 3, 0, Math.PI * 2);
+                ctx.fillStyle = '#fff';
+                ctx.fill();
+            }
+        }
+
+        function drawPortals() {
+            for (const portal of state.portals) {
+                const time = Date.now() / 500;
+
+                // Portal 1
+                const gradient1 = ctx.createRadialGradient(portal.x1, portal.y1, 0, portal.x1, portal.y1, portal.radius * 1.5);
+                gradient1.addColorStop(0, 'rgba(0, 255, 170, 0.8)');
+                gradient1.addColorStop(0.5, 'rgba(0, 200, 150, 0.4)');
+                gradient1.addColorStop(1, 'rgba(0, 255, 170, 0)');
+
+                ctx.beginPath();
+                ctx.arc(portal.x1, portal.y1, portal.radius * (1.2 + Math.sin(time) * 0.1), 0, Math.PI * 2);
+                ctx.fillStyle = gradient1;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(portal.x1, portal.y1, portal.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = '#00ffaa';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Portal 2
+                const gradient2 = ctx.createRadialGradient(portal.x2, portal.y2, 0, portal.x2, portal.y2, portal.radius * 1.5);
+                gradient2.addColorStop(0, 'rgba(0, 255, 170, 0.8)');
+                gradient2.addColorStop(0.5, 'rgba(0, 200, 150, 0.4)');
+                gradient2.addColorStop(1, 'rgba(0, 255, 170, 0)');
+
+                ctx.beginPath();
+                ctx.arc(portal.x2, portal.y2, portal.radius * (1.2 + Math.sin(time + Math.PI) * 0.1), 0, Math.PI * 2);
+                ctx.fillStyle = gradient2;
+                ctx.fill();
+
+                ctx.beginPath();
+                ctx.arc(portal.x2, portal.y2, portal.radius, 0, Math.PI * 2);
+                ctx.strokeStyle = '#00ffaa';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Connection line
+                ctx.beginPath();
+                ctx.moveTo(portal.x1, portal.y1);
+                ctx.lineTo(portal.x2, portal.y2);
+                ctx.strokeStyle = 'rgba(0, 255, 170, 0.2)';
+                ctx.lineWidth = 1;
+                ctx.setLineDash([5, 10]);
+                ctx.stroke();
+                ctx.setLineDash([]);
+            }
+        }
+
+        function drawBumpers() {
+            for (const bumper of state.bumpers) {
+                const time = Date.now() / 300;
+                const pulse = 1 + Math.sin(time) * 0.1;
+
+                // Glow
+                const gradient = ctx.createRadialGradient(bumper.x, bumper.y, 0, bumper.x, bumper.y, bumper.radius * 1.5);
+                gradient.addColorStop(0, 'rgba(0, 170, 255, 0.6)');
+                gradient.addColorStop(1, 'rgba(0, 170, 255, 0)');
+
+                ctx.beginPath();
+                ctx.arc(bumper.x, bumper.y, bumper.radius * 1.5, 0, Math.PI * 2);
+                ctx.fillStyle = gradient;
+                ctx.fill();
+
+                // Bumper
+                ctx.beginPath();
+                ctx.arc(bumper.x, bumper.y, bumper.radius * pulse, 0, Math.PI * 2);
+                ctx.fillStyle = '#00aaff';
+                ctx.fill();
+                ctx.strokeStyle = '#00ddff';
+                ctx.lineWidth = 3;
+                ctx.stroke();
+
+                // Inner ring
+                ctx.beginPath();
+                ctx.arc(bumper.x, bumper.y, bumper.radius * 0.6, 0, Math.PI * 2);
+                ctx.strokeStyle = 'rgba(255, 255, 255, 0.5)';
+                ctx.lineWidth = 2;
+                ctx.stroke();
             }
         }
 
@@ -738,7 +1983,6 @@
             ctx.stroke();
             ctx.setLineDash([]);
 
-            // Arrow head
             const arrowX = ball.x + Math.cos(rad) * length;
             const arrowY = ball.y + Math.sin(rad) * length;
 
@@ -758,11 +2002,10 @@
         }
 
         function drawStars() {
-            // Simple star field background
             ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
-            for (let i = 0; i < 50; i++) {
-                const x = (i * 73) % canvas.width;
-                const y = (i * 137) % canvas.height;
+            for (let i = 0; i < 80; i++) {
+                const x = (i * 73 + state.currentLevel * 17) % canvas.width;
+                const y = (i * 137 + state.currentLevel * 23) % canvas.height;
                 const size = (i % 3) + 1;
                 ctx.beginPath();
                 ctx.arc(x, y, size * 0.5, 0, Math.PI * 2);
@@ -771,26 +2014,22 @@
         }
 
         function render() {
-            // Clear
             ctx.clearRect(0, 0, canvas.width, canvas.height);
 
-            // Background stars
             drawStars();
-
-            // Game elements
             drawGoal();
             drawObstacles();
+            drawBlackHoles();
+            drawPortals();
+            drawBumpers();
             drawTrail();
 
-            // Wells
             for (const well of state.wells) {
                 well.draw();
             }
 
-            // Launch indicator
             drawLaunchIndicator();
 
-            // Ball
             if (state.ball) {
                 state.ball.draw();
             }
@@ -798,15 +2037,20 @@
 
         function fixedUpdate() {
             if (state.ball && state.ball.launched && !state.gameOver) {
-                state.ball.update(state.wells);
+                state.gameTime++;
+                updateMovingObstacles();
+                state.ball.update(state.wells, state.blackHoles);
 
-                // Add to trail
                 state.trail.push({ x: state.ball.x, y: state.ball.y });
                 if (state.trail.length > state.maxTrailLength) {
                     state.trail.shift();
                 }
 
                 checkCollisions();
+            } else if (!state.ballLaunched) {
+                // Still update moving obstacles for preview
+                state.gameTime++;
+                updateMovingObstacles();
             }
         }
 
@@ -818,10 +2062,8 @@
             const deltaTime = currentTime - state.lastTime;
             state.lastTime = currentTime;
 
-            // Accumulate time and run fixed updates
             state.accumulator += deltaTime;
 
-            // Cap accumulator to prevent spiral of death
             if (state.accumulator > 200) {
                 state.accumulator = 200;
             }
@@ -871,19 +2113,16 @@
             if (state.ballLaunched) return;
 
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-            // Check if clicking existing well
             for (let i = state.wells.length - 1; i >= 0; i--) {
                 if (state.wells[i].contains(x, y)) {
-                    // Right click to remove would be nice, but for now just select
                     state.selectedWell = state.wells[i];
                     return;
                 }
             }
 
-            // Add new well
             if (state.wells.length < state.maxWells) {
                 const well = new GravityWell(x, y, state.wellMode);
                 state.wells.push(well);
@@ -896,10 +2135,9 @@
             e.preventDefault();
 
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-            // Remove well on right click
             for (let i = state.wells.length - 1; i >= 0; i--) {
                 if (state.wells[i].contains(x, y)) {
                     state.wells.splice(i, 1);
@@ -913,10 +2151,9 @@
             e.preventDefault();
 
             const rect = canvas.getBoundingClientRect();
-            const x = e.clientX - rect.left;
-            const y = e.clientY - rect.top;
+            const x = (e.clientX - rect.left) * (canvas.width / rect.width);
+            const y = (e.clientY - rect.top) * (canvas.height / rect.height);
 
-            // Adjust strength of hovered well
             for (const well of state.wells) {
                 if (well.contains(x, y)) {
                     well.strength += e.deltaY > 0 ? -20 : 20;
@@ -937,31 +2174,56 @@
         });
 
         function updateLevelGrid() {
-            const grid = document.getElementById('levelGrid');
-            grid.innerHTML = '';
+            const container = document.getElementById('levelGridContainer');
+            container.innerHTML = '';
 
-            for (let i = 0; i < levels.length; i++) {
-                const btn = document.createElement('button');
-                btn.className = 'btn level-btn';
-                btn.textContent = i + 1;
+            for (let pod = 0; pod < 6; pod++) {
+                const label = document.createElement('div');
+                label.className = 'pod-label';
+                label.textContent = `${POD_NAMES[pod]} (${pod * 10 + 1}-${pod * 10 + 10})`;
+                container.appendChild(label);
 
-                if (state.completedLevels.has(i)) {
-                    btn.classList.add('completed');
+                const grid = document.createElement('div');
+                grid.className = 'level-grid';
+
+                for (let i = 0; i < 10; i++) {
+                    const levelIndex = pod * 10 + i;
+                    if (levelIndex >= levels.length) break;
+
+                    const level = levels[levelIndex];
+                    const btn = document.createElement('button');
+                    btn.className = 'btn level-btn';
+                    btn.textContent = levelIndex + 1;
+
+                    if (state.completedLevels.has(levelIndex)) {
+                        btn.classList.add('completed');
+                    }
+
+                    if (level.isBoss) {
+                        btn.classList.add('boss');
+                    }
+
+                    if (level.isChallenge && !level.isBoss) {
+                        btn.classList.add('challenge');
+                    }
+
+                    const isUnlocked = levelIndex === 0 ||
+                                      state.completedLevels.has(levelIndex - 1) ||
+                                      state.completedLevels.has(levelIndex);
+
+                    if (!isUnlocked) {
+                        btn.classList.add('locked');
+                    } else {
+                        btn.addEventListener('click', () => {
+                            loadLevel(levelIndex);
+                            document.getElementById('levelSelect').classList.remove('show');
+                        });
+                    }
+
+                    grid.appendChild(btn);
                 }
 
-                // Unlock first level and any level after a completed one
-                const isUnlocked = i === 0 || state.completedLevels.has(i - 1) || state.completedLevels.has(i);
-
-                if (!isUnlocked) {
-                    btn.classList.add('locked');
-                } else {
-                    btn.addEventListener('click', () => {
-                        loadLevel(i);
-                        document.getElementById('levelSelect').classList.remove('show');
-                    });
-                }
-
-                grid.appendChild(btn);
+                container.appendChild(grid);
             }
         }
 
@@ -972,7 +2234,7 @@
         loadLevel(0);
         requestAnimationFrame(gameLoop);
 
-        console.log('Gravity Golf loaded! Use gravity wells to guide the ball to the goal.');
+        console.log('Gravity Golf loaded! 60 levels of gravitational puzzle action.');
     </script>
 </body>
 </html>
