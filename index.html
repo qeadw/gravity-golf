@@ -1628,6 +1628,10 @@
             if (state.ballLaunched) return;
 
             const level = levels[state.currentLevel];
+            // Reset timing state so physics is fully deterministic
+            state.gameTime = 0;
+            state.lastTime = 0;
+            state.accumulator = 0;
             state.ball.launch(level.launchAngle, level.launchPower);
             state.ballLaunched = true;
         }
