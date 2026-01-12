@@ -431,26 +431,7 @@
                 launchPower: 5
             },
             {
-                name: "Corridor",
-                ball: { x: 50, y: 500 },
-                goal: { x: 850, y: 100, radius: 25 },
-                obstacles: [
-                    { x: 150, y: 0, width: 20, height: 350 },
-                    { x: 150, y: 450, width: 20, height: 150 },
-                    { x: 350, y: 0, width: 20, height: 150 },
-                    { x: 350, y: 250, width: 20, height: 350 },
-                    { x: 550, y: 0, width: 20, height: 400 },
-                    { x: 550, y: 500, width: 20, height: 100 },
-                    { x: 750, y: 0, width: 20, height: 200 },
-                    { x: 750, y: 300, width: 20, height: 300 }
-                ],
-                maxWells: 10,  // 4 gaps = 8-12 wells
-                launchAngle: -30,
-                launchPower: 4
-            },
-            // BOSS LEVEL 10
-            {
-                name: "BOSS: The Maze",
+                name: "The Maze",
                 ball: { x: 50, y: 300 },
                 goal: { x: 850, y: 300, radius: 22 },
                 obstacles: [
@@ -464,8 +445,27 @@
                     { x: 750, y: 0, width: 15, height: 200 },
                     { x: 750, y: 450, width: 15, height: 150 }
                 ],
-                maxWells: 10,  // 3 gaps = 6-9 wells (boss level gets extra)
+                maxWells: 8,  // 3 gaps = 6-9 wells
                 launchAngle: 0,
+                launchPower: 4
+            },
+            // BOSS LEVEL 10
+            {
+                name: "BOSS: Corridor",
+                ball: { x: 50, y: 500 },
+                goal: { x: 850, y: 100, radius: 22 },
+                obstacles: [
+                    { x: 150, y: 0, width: 20, height: 350 },
+                    { x: 150, y: 450, width: 20, height: 150 },
+                    { x: 350, y: 0, width: 20, height: 150 },
+                    { x: 350, y: 250, width: 20, height: 350 },
+                    { x: 550, y: 0, width: 20, height: 400 },
+                    { x: 550, y: 500, width: 20, height: 100 },
+                    { x: 750, y: 0, width: 20, height: 200 },
+                    { x: 750, y: 300, width: 20, height: 300 }
+                ],
+                maxWells: 12,  // 4 gaps = 8-12 wells (boss level)
+                launchAngle: -30,
                 launchPower: 4,
                 isBoss: true
             },
