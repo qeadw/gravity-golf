@@ -341,7 +341,7 @@
                 ball: { x: 100, y: 300 },
                 goal: { x: 800, y: 300, radius: 30 },
                 obstacles: [],
-                maxWells: 3,
+                maxWells: 1,  // 0 gaps, tutorial level
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -350,7 +350,7 @@
                 ball: { x: 100, y: 200 },
                 goal: { x: 800, y: 400, radius: 30 },
                 obstacles: [],
-                maxWells: 2,
+                maxWells: 2,  // 0 gaps, but need to curve
                 launchAngle: 10,
                 launchPower: 5
             },
@@ -361,7 +361,7 @@
                 obstacles: [
                     { x: 450, y: 350, width: 30, height: 300 }
                 ],
-                maxWells: 3,
+                maxWells: 3,  // 1 wall = 2-3 wells
                 launchAngle: -30,
                 launchPower: 6
             },
@@ -373,7 +373,7 @@
                     { x: 400, y: 0, width: 30, height: 250 },
                     { x: 400, y: 400, width: 30, height: 200 }
                 ],
-                maxWells: 3,
+                maxWells: 3,  // 1 gap = 2-3 wells
                 launchAngle: 20,
                 launchPower: 5
             },
@@ -386,7 +386,7 @@
                     { x: 400, y: 200, width: 20, height: 400 },
                     { x: 600, y: 0, width: 20, height: 400 }
                 ],
-                maxWells: 5,
+                maxWells: 9,  // 3 gaps = 6-9 wells
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -399,7 +399,7 @@
                     { x: 300, y: 370, width: 300, height: 30 },
                     { x: 450, y: 230, width: 30, height: 140 }
                 ],
-                maxWells: 3,
+                maxWells: 4,  // 1 complex passage = 3-4 wells
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -414,7 +414,7 @@
                     { x: 550, y: 300, width: 100, height: 20 },
                     { x: 400, y: 400, width: 100, height: 20 }
                 ],
-                maxWells: 4,
+                maxWells: 6,  // 2 gap layers = 4-6 wells
                 launchAngle: 60,
                 launchPower: 4
             },
@@ -425,7 +425,7 @@
                 obstacles: [
                     { x: 350, y: 200, width: 200, height: 200 }
                 ],
-                maxWells: 3,
+                maxWells: 3,  // 1 block to curve around = 2-3 wells
                 launchAngle: -20,
                 launchPower: 5
             },
@@ -443,7 +443,7 @@
                     { x: 750, y: 0, width: 20, height: 200 },
                     { x: 750, y: 300, width: 20, height: 300 }
                 ],
-                maxWells: 6,
+                maxWells: 10,  // 4 gaps = 8-12 wells
                 launchAngle: -30,
                 launchPower: 4
             },
@@ -464,7 +464,7 @@
                     { x: 750, y: 200, width: 15, height: 250 },
                     { x: 750, y: 550, width: 15, height: 50 }
                 ],
-                maxWells: 8,
+                maxWells: 15,  // 5 gaps = 10-15 wells (boss level)
                 launchAngle: 0,
                 launchPower: 4,
                 isBoss: true
@@ -479,7 +479,7 @@
                 movingObstacles: [
                     { x: 500, y: 200, width: 30, height: 150, axis: 'y', range: 200, speed: 2 }
                 ],
-                maxWells: 3,
+                maxWells: 3,  // 1 moving obstacle = 2-3 wells
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -492,7 +492,7 @@
                     { x: 350, y: 150, width: 25, height: 120, axis: 'y', range: 250, speed: 2.5 },
                     { x: 650, y: 400, width: 25, height: 120, axis: 'y', range: 250, speed: 2.5 }
                 ],
-                maxWells: 4,
+                maxWells: 6,  // 2 moving obstacles = 4-6 wells
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -506,7 +506,7 @@
                 movingObstacles: [
                     { x: 200, y: 350, width: 150, height: 20, axis: 'x', range: 300, speed: 3 }
                 ],
-                maxWells: 4,
+                maxWells: 6,  // 1 wall + 1 moving = 4-6 wells
                 launchAngle: -45,
                 launchPower: 5
             },
@@ -520,7 +520,7 @@
                     { x: 450, y: 450, width: 20, height: 100, axis: 'y', range: 350, speed: 3.5 },
                     { x: 650, y: 150, width: 20, height: 100, axis: 'y', range: 300, speed: 2.5 }
                 ],
-                maxWells: 5,
+                maxWells: 9,  // 3 moving obstacles = 6-9 wells
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -533,7 +533,7 @@
                     { x: 100, y: 250, width: 150, height: 20, axis: 'x', range: 300, speed: 4 },
                     { x: 550, y: 350, width: 150, height: 20, axis: 'x', range: 300, speed: 4 }
                 ],
-                maxWells: 4,
+                maxWells: 6,  // 2 moving obstacles = 4-6 wells
                 launchAngle: -90,
                 launchPower: 4
             },
@@ -548,7 +548,7 @@
                 movingObstacles: [
                     { x: 385, y: 250, width: 50, height: 30, axis: 'y', range: 120, speed: 1.5 }
                 ],
-                maxWells: 3,
+                maxWells: 4,  // 1 gap with moving blocker = 3-4 wells
                 launchAngle: 0,
                 launchPower: 3
             },
@@ -562,7 +562,7 @@
                     { x: 500, y: 400, width: 100, height: 20, axis: 'y', range: 300, speed: 2 },
                     { x: 700, y: 150, width: 100, height: 20, axis: 'y', range: 300, speed: 2 }
                 ],
-                maxWells: 5,
+                maxWells: 9,  // 3 moving obstacles = 6-9 wells
                 launchAngle: -30,
                 launchPower: 5
             },
@@ -575,7 +575,7 @@
                     { x: 400, y: 100, width: 200, height: 20, axis: 'y', range: 150, speed: 2 },
                     { x: 400, y: 530, width: 200, height: 20, axis: 'y', range: 150, speed: 2, phase: Math.PI }
                 ],
-                maxWells: 4,
+                maxWells: 4,  // 1 squeeze passage = 3-4 wells
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -591,7 +591,7 @@
                     { x: 350, y: 150, width: 80, height: 20, axis: 'x', range: 150, speed: 2 },
                     { x: 600, y: 450, width: 80, height: 20, axis: 'x', range: 150, speed: 2.5 }
                 ],
-                maxWells: 6,
+                maxWells: 12,  // 5 moving obstacles = 10-15 wells
                 launchAngle: 30,
                 launchPower: 4
             },
@@ -613,7 +613,7 @@
                     { x: 300, y: 300, width: 100, height: 20, axis: 'x', range: 100, speed: 4 },
                     { x: 600, y: 350, width: 100, height: 20, axis: 'x', range: 100, speed: 4 }
                 ],
-                maxWells: 7,
+                maxWells: 18,  // 2 gaps + 5 moving = 14-21 wells (boss)
                 launchAngle: 0,
                 launchPower: 4,
                 isBoss: true
@@ -628,7 +628,7 @@
                 blackHoles: [
                     { x: 550, y: 350, radius: 40, strength: 300 }
                 ],
-                maxWells: 4,
+                maxWells: 3,  // 1 black hole = 2-3 wells
                 launchAngle: 0,
                 launchPower: 6
             },
@@ -640,7 +640,7 @@
                 blackHoles: [
                     { x: 550, y: 350, radius: 35, strength: 350 }
                 ],
-                maxWells: 3,
+                maxWells: 3,  // 1 black hole = 2-3 wells
                 launchAngle: -20,
                 launchPower: 5
             },
@@ -653,7 +653,7 @@
                     { x: 400, y: 200, radius: 30, strength: 250 },
                     { x: 700, y: 500, radius: 30, strength: 250 }
                 ],
-                maxWells: 5,
+                maxWells: 6,  // 2 black holes = 4-6 wells
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -667,7 +667,7 @@
                 blackHoles: [
                     { x: 300, y: 350, radius: 35, strength: 300 }
                 ],
-                maxWells: 4,
+                maxWells: 6,  // 1 wall + 1 black hole = 4-6 wells
                 launchAngle: 90,
                 launchPower: 4
             },
@@ -679,7 +679,7 @@
                 blackHoles: [
                     { x: 550, y: 350, radius: 60, strength: 400 }
                 ],
-                maxWells: 5,
+                maxWells: 4,  // 1 large black hole = 3-4 wells
                 launchAngle: -30,
                 launchPower: 7
             },
@@ -693,7 +693,7 @@
                     { x: 550, y: 500, radius: 25, strength: 200 },
                     { x: 800, y: 200, radius: 25, strength: 200 }
                 ],
-                maxWells: 6,
+                maxWells: 9,  // 3 black holes = 6-9 wells
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -705,7 +705,7 @@
                 blackHoles: [
                     { x: 550, y: 350, radius: 50, strength: 450 }
                 ],
-                maxWells: 5,
+                maxWells: 4,  // 1 large black hole = 3-4 wells
                 launchAngle: -90,
                 launchPower: 8
             },
@@ -720,7 +720,7 @@
                     { x: 800, y: 300, radius: 25, strength: 180 },
                     { x: 450, y: 150, radius: 25, strength: 180 }
                 ],
-                maxWells: 6,
+                maxWells: 10,  // 4 black holes = 8-12 wells
                 launchAngle: 30,
                 launchPower: 5
             },
@@ -736,7 +736,7 @@
                     { x: 350, y: 350, radius: 35, strength: 280 },
                     { x: 750, y: 350, radius: 35, strength: 280 }
                 ],
-                maxWells: 5,
+                maxWells: 9,  // 1 gap + 2 black holes = 7-9 wells
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -756,7 +756,7 @@
                     { x: 400, y: 150, radius: 25, strength: 200 },
                     { x: 700, y: 550, radius: 25, strength: 200 }
                 ],
-                maxWells: 8,
+                maxWells: 15,  // 2 gaps + 3 black holes = 12-15 wells (boss)
                 launchAngle: 0,
                 launchPower: 8,
                 isBoss: true
@@ -773,7 +773,7 @@
                 portals: [
                     { x1: 400, y1: 375, x2: 600, y2: 375, radius: 25 }
                 ],
-                maxWells: 3,
+                maxWells: 4,
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -786,7 +786,7 @@
                     { x1: 350, y1: 550, x2: 550, y2: 200, radius: 25 },
                     { x1: 750, y1: 300, x2: 950, y2: 150, radius: 25 }
                 ],
-                maxWells: 4,
+                maxWells: 5,
                 launchAngle: -20,
                 launchPower: 5
             },
@@ -801,7 +801,7 @@
                 portals: [
                     { x1: 200, y1: 375, x2: 1000, y2: 200, radius: 25 }
                 ],
-                maxWells: 4,
+                maxWells: 5,
                 launchAngle: 180,
                 launchPower: 5
             },
@@ -831,7 +831,7 @@
                     { x1: 200, y1: 400, x2: 450, y2: 600, radius: 22 },
                     { x1: 500, y1: 150, x2: 750, y2: 650, radius: 22 }
                 ],
-                maxWells: 5,
+                maxWells: 9,
                 launchAngle: 45,
                 launchPower: 4
             },
@@ -846,7 +846,7 @@
                     { x1: 300, y1: 150, x2: 300, y2: 600, radius: 25 },
                     { x1: 900, y1: 150, x2: 900, y2: 600, radius: 25 }
                 ],
-                maxWells: 4,
+                maxWells: 6,
                 launchAngle: -30,
                 launchPower: 5
             },
@@ -861,7 +861,7 @@
                     { x1: 150, y1: 100, x2: 1050, y2: 650, radius: 22 },
                     { x1: 150, y1: 650, x2: 1050, y2: 100, radius: 22 }
                 ],
-                maxWells: 5,
+                maxWells: 6,
                 launchAngle: 180,
                 launchPower: 4
             },
@@ -875,7 +875,7 @@
                     { x1: 500, y1: 350, x2: 700, y2: 250, radius: 22 },
                     { x1: 800, y1: 150, x2: 1000, y2: 100, radius: 22 }
                 ],
-                maxWells: 4,
+                maxWells: 6,
                 launchAngle: -30,
                 launchPower: 5
             },
@@ -889,7 +889,7 @@
                 portals: [
                     { x1: 150, y1: 375, x2: 1050, y2: 375, radius: 25 }
                 ],
-                maxWells: 3,
+                maxWells: 4,
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -911,7 +911,7 @@
                     { x1: 500, y1: 100, x2: 750, y2: 650, radius: 20 },
                     { x1: 850, y1: 200, x2: 1050, y2: 500, radius: 20 }
                 ],
-                maxWells: 7,
+                maxWells: 12,
                 launchAngle: 0,
                 launchPower: 4,
                 isBoss: true
@@ -939,7 +939,7 @@
                     { x: 400, y: 500, radius: 35 },
                     { x: 800, y: 300, radius: 35 }
                 ],
-                maxWells: 4,
+                maxWells: 5,
                 launchAngle: -30,
                 launchPower: 4
             },
@@ -954,7 +954,7 @@
                     { x: 750, y: 300, radius: 30 },
                     { x: 950, y: 500, radius: 30 }
                 ],
-                maxWells: 5,
+                maxWells: 8,
                 launchAngle: 0,
                 launchPower: 3
             },
@@ -973,7 +973,7 @@
                     { x: 550, y: 200, radius: 25 },
                     { x: 750, y: 200, radius: 25 }
                 ],
-                maxWells: 5,
+                maxWells: 10,
                 launchAngle: -90,
                 launchPower: 5
             },
@@ -993,7 +993,7 @@
                     { x: 1000, y: 250, radius: 30 },
                     { x: 1000, y: 550, radius: 30 }
                 ],
-                maxWells: 6,
+                maxWells: 10,
                 launchAngle: 0,
                 launchPower: 4
             },
@@ -1010,7 +1010,7 @@
                     { x: 400, y: 250, radius: 30 },
                     { x: 900, y: 550, radius: 30 }
                 ],
-                maxWells: 5,
+                maxWells: 10,
                 launchAngle: 45,
                 launchPower: 4
             },
@@ -1026,7 +1026,7 @@
                     { x: 900, y: 400, radius: 30 },
                     { x: 1100, y: 550, radius: 30 }
                 ],
-                maxWells: 5,
+                maxWells: 8,
                 launchAngle: 30,
                 launchPower: 4
             },
@@ -1045,7 +1045,7 @@
                     { x: 550, y: 500, radius: 25 },
                     { x: 750, y: 500, radius: 25 }
                 ],
-                maxWells: 6,
+                maxWells: 12,
                 launchAngle: 0,
                 launchPower: 5
             },
@@ -1061,7 +1061,7 @@
                     { x: 850, y: 450, radius: 30 },
                     { x: 1050, y: 200, radius: 30 }
                 ],
-                maxWells: 5,
+                maxWells: 8,
                 launchAngle: -45,
                 launchPower: 5
             },
@@ -1086,7 +1086,7 @@
                     { x: 1050, y: 300, radius: 35 },
                     { x: 1050, y: 500, radius: 35 }
                 ],
-                maxWells: 8,
+                maxWells: 15,
                 launchAngle: 0,
                 launchPower: 4,
                 isBoss: true
@@ -1114,7 +1114,7 @@
                     { x: 1200, y: 350, radius: 30 },
                     { x: 1200, y: 550, radius: 30 }
                 ],
-                maxWells: 6,
+                maxWells: 12,
                 launchAngle: 0,
                 launchPower: 5,
                 isChallenge: true
@@ -1136,7 +1136,7 @@
                     { x: 600, y: 450, radius: 35 },
                     { x: 900, y: 450, radius: 35 }
                 ],
-                maxWells: 7,
+                maxWells: 10,
                 launchAngle: -90,
                 launchPower: 5,
                 isChallenge: true
@@ -1160,7 +1160,7 @@
                 bumpers: [
                     { x: 900, y: 200, radius: 30 }
                 ],
-                maxWells: 7,
+                maxWells: 12,
                 launchAngle: 30,
                 launchPower: 4,
                 isChallenge: true
@@ -1185,7 +1185,7 @@
                 movingObstacles: [
                     { x: 250, y: 350, width: 20, height: 80, axis: 'y', range: 150, speed: 2 }
                 ],
-                maxWells: 8,
+                maxWells: 14,
                 launchAngle: 0,
                 launchPower: 7,
                 isChallenge: true
@@ -1213,7 +1213,7 @@
                 movingObstacles: [
                     { x: 400, y: 150, width: 100, height: 20, axis: 'y', range: 100, speed: 2 }
                 ],
-                maxWells: 7,
+                maxWells: 16,
                 launchAngle: 0,
                 launchPower: 4,
                 isChallenge: true
@@ -1240,7 +1240,7 @@
                     { x: 700, y: 450, radius: 25, strength: 180 },
                     { x: 1100, y: 450, radius: 25, strength: 180 }
                 ],
-                maxWells: 8,
+                maxWells: 18,
                 launchAngle: 45,
                 launchPower: 4,
                 isChallenge: true
@@ -1267,7 +1267,7 @@
                     { x: 200, y: 300, radius: 30 },
                     { x: 200, y: 600, radius: 30 }
                 ],
-                maxWells: 8,
+                maxWells: 15,
                 launchAngle: 180,
                 launchPower: 5,
                 isChallenge: true
@@ -1295,7 +1295,7 @@
                     { x: 550, y: 150, width: 100, height: 20, axis: 'x', range: 200, speed: 3 },
                     { x: 850, y: 700, width: 100, height: 20, axis: 'x', range: 200, speed: 3 }
                 ],
-                maxWells: 8,
+                maxWells: 15,
                 launchAngle: -90,
                 launchPower: 6,
                 isChallenge: true
@@ -1330,7 +1330,7 @@
                     { x: 1300, y: 300, radius: 25 },
                     { x: 1300, y: 600, radius: 25 }
                 ],
-                maxWells: 9,
+                maxWells: 20,
                 launchAngle: 0,
                 launchPower: 7,
                 isChallenge: true
@@ -1378,7 +1378,7 @@
                     { x: 1080, y: 450, radius: 25 },
                     { x: 1320, y: 450, radius: 25 }
                 ],
-                maxWells: 10,
+                maxWells: 25,
                 launchAngle: 0,
                 launchPower: 6,
                 isBoss: true,
