@@ -452,20 +452,19 @@
             {
                 name: "BOSS: The Maze",
                 ball: { x: 50, y: 300 },
-                goal: { x: 850, y: 300, radius: 20 },
+                goal: { x: 850, y: 300, radius: 22 },
                 obstacles: [
-                    { x: 150, y: 0, width: 15, height: 200 },
-                    { x: 150, y: 300, width: 15, height: 300 },
-                    { x: 300, y: 0, width: 15, height: 400 },
-                    { x: 300, y: 500, width: 15, height: 100 },
-                    { x: 450, y: 100, width: 15, height: 200 },
-                    { x: 450, y: 400, width: 15, height: 200 },
-                    { x: 600, y: 0, width: 15, height: 150 },
-                    { x: 600, y: 250, width: 15, height: 350 },
-                    { x: 750, y: 200, width: 15, height: 250 },
-                    { x: 750, y: 550, width: 15, height: 50 }
+                    // Wall 1: gap at y=200-400 (ball can pass at y=300)
+                    { x: 250, y: 0, width: 15, height: 200 },
+                    { x: 250, y: 400, width: 15, height: 200 },
+                    // Wall 2: gap at y=100-300 (need to curve up)
+                    { x: 500, y: 0, width: 15, height: 100 },
+                    { x: 500, y: 300, width: 15, height: 300 },
+                    // Wall 3: gap at y=200-450 (curve back to goal height)
+                    { x: 750, y: 0, width: 15, height: 200 },
+                    { x: 750, y: 450, width: 15, height: 150 }
                 ],
-                maxWells: 15,  // 5 gaps = 10-15 wells (boss level)
+                maxWells: 10,  // 3 gaps = 6-9 wells (boss level gets extra)
                 launchAngle: 0,
                 launchPower: 4,
                 isBoss: true
