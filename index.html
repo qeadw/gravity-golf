@@ -1387,6 +1387,42 @@
         ];
 
         // ============================================
+        // LINE OF SIGHT HELPER
+        // ============================================
+        function lineIntersectsRect(x1, y1, x2, y2, rx, ry, rw, rh) {
+            // Check if line segment (x1,y1)-(x2,y2) intersects rectangle
+            // Using line-segment vs rectangle intersection test
+
+            // Check if line intersects any of the 4 edges of the rectangle
+            function lineIntersectsLine(x1, y1, x2, y2, x3, y3, x4, y4) {
+                const denom = (x1 - x2) * (y3 - y4) - (y1 - y2) * (x3 - x4);
+                if (Math.abs(denom) < 0.0001) return false;
+
+                const t = ((x1 - x3) * (y3 - y4) - (y1 - y3) * (x3 - x4)) / denom;
+                const u = -((x1 - x2) * (y1 - y3) - (y1 - y2) * (x1 - x3)) / denom;
+
+                return t >= 0 && t <= 1 && u >= 0 && u <= 1;
+            }
+
+            // Check all 4 edges
+            if (lineIntersectsLine(x1, y1, x2, y2, rx, ry, rx + rw, ry)) return true; // Top
+            if (lineIntersectsLine(x1, y1, x2, y2, rx, ry + rh, rx + rw, ry + rh)) return true; // Bottom
+            if (lineIntersectsLine(x1, y1, x2, y2, rx, ry, rx, ry + rh)) return true; // Left
+            if (lineIntersectsLine(x1, y1, x2, y2, rx + rw, ry, rx + rw, ry + rh)) return true; // Right
+
+            return false;
+        }
+
+        function isBlockedByObstacle(x1, y1, x2, y2, obstacles) {
+            for (const obs of obstacles) {
+                if (lineIntersectsRect(x1, y1, x2, y2, obs.x, obs.y, obs.width, obs.height)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // ============================================
         // BALL CLASS
         // ============================================
         class Ball {
@@ -1406,11 +1442,16 @@
                 this.launched = true;
             }
 
-            update(wells, blackHoles) {
+            update(wells, blackHoles, obstacles) {
                 if (!this.launched) return;
 
-                // Apply gravity from player wells
+                // Apply gravity from player wells (blocked by obstacles)
                 for (const well of wells) {
+                    // Check if wall blocks line of sight to well
+                    if (isBlockedByObstacle(this.x, this.y, well.x, well.y, obstacles)) {
+                        continue; // Gravity doesn't go through walls
+                    }
+
                     const dx = well.x - this.x;
                     const dy = well.y - this.y;
                     const dist = Math.sqrt(dx * dx + dy * dy);
@@ -2057,7 +2098,7 @@
             if (state.ball && state.ball.launched && !state.gameOver) {
                 state.gameTime++;
                 updateMovingObstacles();
-                state.ball.update(state.wells, state.blackHoles);
+                state.ball.update(state.wells, state.blackHoles, state.obstacles);
 
                 state.trail.push({ x: state.ball.x, y: state.ball.y });
                 if (state.trail.length > state.maxTrailLength) {
