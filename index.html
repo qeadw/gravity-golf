@@ -313,7 +313,9 @@
             maxTrailLength: 50,
             lastTime: 0,
             accumulator: 0,
-            gameTime: 0
+            gameTime: 0,
+            cheatsEnabled: false,
+            cheatBuffer: ''
         };
 
         const FIXED_TIMESTEP = 1000 / 60;
@@ -1576,7 +1578,7 @@
             state.portals = (level.portals || []).map(p => ({ ...p }));
             state.bumpers = (level.bumpers || []).map(b => ({ ...b }));
             state.wells = [];
-            state.maxWells = level.maxWells;
+            state.maxWells = state.cheatsEnabled ? 999 : level.maxWells;
             state.ballLaunched = false;
             state.gameOver = false;
             state.trail = [];
@@ -2171,6 +2173,28 @@
             } else if (e.code === 'KeyR') {
                 resetLevel();
             }
+
+            // Cheat code detection
+            if (e.key.length === 1) {
+                state.cheatBuffer += e.key.toLowerCase();
+                if (state.cheatBuffer.length > 7) {
+                    state.cheatBuffer = state.cheatBuffer.slice(-7);
+                }
+                if (state.cheatBuffer === 'cheater') {
+                    state.cheatsEnabled = !state.cheatsEnabled;
+                    state.cheatBuffer = '';
+                    if (state.cheatsEnabled) {
+                        state.maxWells = 999;
+                        document.getElementById('wellCounter').style.color = '#ffd700';
+                        console.log('Cheats enabled: Infinite wells, all levels unlocked');
+                    } else {
+                        state.maxWells = levels[state.currentLevel].maxWells;
+                        document.getElementById('wellCounter').style.color = '';
+                        console.log('Cheats disabled');
+                    }
+                    updateWellCounter();
+                }
+            }
         });
 
         function updateLevelGrid() {
@@ -2207,7 +2231,8 @@
                         btn.classList.add('challenge');
                     }
 
-                    const isUnlocked = levelIndex === 0 ||
+                    const isUnlocked = state.cheatsEnabled ||
+                                      levelIndex === 0 ||
                                       state.completedLevels.has(levelIndex - 1) ||
                                       state.completedLevels.has(levelIndex);
 
