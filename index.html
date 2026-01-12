@@ -225,14 +225,20 @@
             wells: [],
             isLaunching: false,
             ballLaunched: false,
+            gameOver: false,
             currentLevel: 0,
             completedLevels: new Set(),
             maxWells: 5,
             wellMode: 'attractor', // 'attractor' or 'repulsor'
             selectedWell: null,
             trail: [],
-            maxTrailLength: 50
+            maxTrailLength: 50,
+            lastTime: 0,
+            accumulator: 0
         };
+
+        // Fixed timestep for deterministic physics
+        const FIXED_TIMESTEP = 1000 / 60; // 60 updates per second
 
         // Physics constants
         const PHYSICS = {
@@ -556,6 +562,7 @@
             state.wells = [];
             state.maxWells = level.maxWells;
             state.ballLaunched = false;
+            state.gameOver = false;
             state.trail = [];
 
             document.getElementById('currentLevel').textContent = index + 1;
@@ -567,6 +574,7 @@
             const level = levels[state.currentLevel];
             state.ball = new Ball(level.ball.x, level.ball.y);
             state.ballLaunched = false;
+            state.gameOver = false;
             state.trail = [];
             hideMessage();
         }
@@ -580,6 +588,8 @@
         }
 
         function checkCollisions() {
+            if (state.gameOver) return;
+
             const ball = state.ball;
 
             // Check goal
@@ -588,6 +598,7 @@
             const dist = Math.sqrt(dx * dx + dy * dy);
 
             if (dist < ball.radius + state.goal.radius) {
+                state.gameOver = true;
                 onWin();
                 return;
             }
@@ -598,6 +609,7 @@
                     ball.x - ball.radius < obs.x + obs.width &&
                     ball.y + ball.radius > obs.y &&
                     ball.y - ball.radius < obs.y + obs.height) {
+                    state.gameOver = true;
                     onFail();
                     return;
                 }
@@ -605,6 +617,7 @@
 
             // Check if ball stopped
             if (ball.launched && ball.isStopped()) {
+                state.gameOver = true;
                 onFail();
             }
         }
@@ -783,8 +796,8 @@
             }
         }
 
-        function update() {
-            if (state.ball && state.ball.launched) {
+        function fixedUpdate() {
+            if (state.ball && state.ball.launched && !state.gameOver) {
                 state.ball.update(state.wells);
 
                 // Add to trail
@@ -797,8 +810,27 @@
             }
         }
 
-        function gameLoop() {
-            update();
+        function gameLoop(currentTime) {
+            if (state.lastTime === 0) {
+                state.lastTime = currentTime;
+            }
+
+            const deltaTime = currentTime - state.lastTime;
+            state.lastTime = currentTime;
+
+            // Accumulate time and run fixed updates
+            state.accumulator += deltaTime;
+
+            // Cap accumulator to prevent spiral of death
+            if (state.accumulator > 200) {
+                state.accumulator = 200;
+            }
+
+            while (state.accumulator >= FIXED_TIMESTEP) {
+                fixedUpdate();
+                state.accumulator -= FIXED_TIMESTEP;
+            }
+
             render();
             requestAnimationFrame(gameLoop);
         }
@@ -938,7 +970,7 @@
         // ============================================
         document.getElementById('attractorBtn').classList.add('active');
         loadLevel(0);
-        gameLoop();
+        requestAnimationFrame(gameLoop);
 
         console.log('Gravity Golf loaded! Use gravity wells to guide the ball to the goal.');
     </script>
