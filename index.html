@@ -2823,18 +2823,25 @@
             // Arrow keys move selected well
             if (state.selectedWell && !state.ballLaunched) {
                 const moveAmount = e.shiftKey ? 10 : 1;
-                if (e.code === 'ArrowLeft') {
-                    e.preventDefault();
-                    state.selectedWell.x -= moveAmount;
-                } else if (e.code === 'ArrowRight') {
-                    e.preventDefault();
-                    state.selectedWell.x += moveAmount;
-                } else if (e.code === 'ArrowUp') {
-                    e.preventDefault();
-                    state.selectedWell.y -= moveAmount;
-                } else if (e.code === 'ArrowDown') {
-                    e.preventDefault();
-                    state.selectedWell.y += moveAmount;
+                let dx = 0, dy = 0;
+                if (e.code === 'ArrowLeft') { e.preventDefault(); dx = -moveAmount; }
+                else if (e.code === 'ArrowRight') { e.preventDefault(); dx = moveAmount; }
+                else if (e.code === 'ArrowUp') { e.preventDefault(); dy = -moveAmount; }
+                else if (e.code === 'ArrowDown') { e.preventDefault(); dy = moveAmount; }
+
+                if (dx !== 0 || dy !== 0) {
+                    const newX = state.selectedWell.x + dx;
+                    const newY = state.selectedWell.y + dy;
+                    // Check collision with other wells (skip if cheats enabled)
+                    const collides = !state.cheatsEnabled && state.wells.some(w => {
+                        if (w === state.selectedWell) return false;
+                        const dist = Math.sqrt((newX - w.x) ** 2 + (newY - w.y) ** 2);
+                        return dist < w.radius + state.selectedWell.radius;
+                    });
+                    if (!collides) {
+                        state.selectedWell.x = newX;
+                        state.selectedWell.y = newY;
+                    }
                 }
             }
 
