@@ -2183,9 +2183,20 @@
 
             document.getElementById('currentLevel').textContent = index + 1;
 
-            // Hide instructions after first level
+            // Show level-specific instructions for first 3 levels
             const instructions = document.getElementById('instructions');
-            instructions.style.display = index > 0 ? 'none' : 'block';
+            if (index === 0) {
+                instructions.innerHTML = '<strong>Attractors</strong> (blue) pull, <strong>Repulsors</strong> (red) push. Right-click to remove wells. <span id="obstacleHint"></span>';
+                instructions.style.display = 'block';
+            } else if (index === 1) {
+                instructions.innerHTML = '<strong>Tip:</strong> Use the scroll wheel to adjust well strength. <span id="obstacleHint"></span>';
+                instructions.style.display = 'block';
+            } else if (index === 2) {
+                instructions.innerHTML = '<strong>Tip:</strong> Click a well to select it, then use arrow keys for micro-movements. <span id="obstacleHint"></span>';
+                instructions.style.display = 'block';
+            } else {
+                instructions.style.display = 'none';
+            }
             document.getElementById('podName').textContent = POD_NAMES[getPod(index)];
             document.getElementById('obstacleHint').innerHTML = POD_HINTS[getPod(index)];
             updateWellCounter();
@@ -2756,7 +2767,6 @@
                 state.wellHistory.push([...state.wells.map(w => ({ x: w.x, y: w.y, type: w.type, strength: w.strength }))]);
                 const well = new GravityWell(x, y, state.wellMode);
                 state.wells.push(well);
-                state.selectedWell = well;
                 updateWellCounter();
             }
         });
@@ -2771,6 +2781,7 @@
             for (let i = state.wells.length - 1; i >= 0; i--) {
                 if (state.wells[i].contains(x, y)) {
                     state.wells.splice(i, 1);
+                    state.wellHistory = []; // Clear history so deletions can't be undone
                     updateWellCounter();
                     return;
                 }
