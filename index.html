@@ -835,6 +835,7 @@
                     const data = JSON.parse(saved);
                     state.completedLevels = new Set(data.completedLevels || []);
                     state.levelStats = data.levelStats || {};
+                    state.currentLevel = data.currentLevel || 0;
                 }
             } catch (e) {
                 console.log('Could not load saved data');
@@ -845,7 +846,8 @@
             try {
                 const data = {
                     completedLevels: Array.from(state.completedLevels),
-                    levelStats: state.levelStats
+                    levelStats: state.levelStats,
+                    currentLevel: state.currentLevel
                 };
                 localStorage.setItem('gravityGolfData', JSON.stringify(data));
             } catch (e) {
@@ -2202,6 +2204,7 @@
             updateWellCounter();
             updateAttemptCounter();
             hideMessage();
+            saveData();
         }
 
         function resetLevel(incrementAttempt = false) {
@@ -3631,7 +3634,7 @@
         initLeaderboard();
         initEditor();
         document.getElementById('attractorBtn').classList.add('active');
-        loadLevel(0);
+        loadLevel(state.currentLevel);
         requestAnimationFrame(gameLoop);
 
         console.log('Gravity Golf loaded! 60 levels of gravitational puzzle action.');
