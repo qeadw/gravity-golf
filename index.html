@@ -817,7 +817,7 @@
             levelStats: {}
         };
 
-        // Pod goals: { maxAttempts, maxNodes }
+        // Pod goals: { maxAttempts, maxNodes } - fallback when no leaderboard data
         const POD_GOALS = [
             { maxAttempts: 15, maxNodes: 20 },   // Pod 1: The Basics
             { maxAttempts: 25, maxNodes: 50 },   // Pod 2: Moving Targets
@@ -826,6 +826,43 @@
             { maxAttempts: 50, maxNodes: 90 },   // Pod 5: Pinball Wizard
             { maxAttempts: 60, maxNodes: 120 }   // Pod 6: The Gauntlet
         ];
+
+        // Dynamic level targets based on top 100 leaderboard averages
+        const levelTargets = {
+            data: {},  // { levelIndex: { avgAttempts, avgNodes, count } }
+            lastFetch: 0,
+            cacheTime: 5 * 60 * 1000,  // 5 minute cache
+
+            // Get target for a specific level (falls back to pod goals if no data)
+            getTarget(levelIndex) {
+                const levelData = this.data[levelIndex];
+                if (levelData && levelData.count >= 10) {
+                    return {
+                        maxAttempts: Math.ceil(levelData.avgAttempts),
+                        maxNodes: Math.ceil(levelData.avgNodes)
+                    };
+                }
+                // Fallback to pod goals
+                const pod = getPod(levelIndex);
+                return POD_GOALS[pod];
+            },
+
+            // Update targets from leaderboard data
+            async fetchTargets() {
+                if (Date.now() - this.lastFetch < this.cacheTime) return;
+                this.lastFetch = Date.now();
+
+                try {
+                    const result = await DatabaseAPI.getLevelAverages(100);
+                    if (!result.local && result.averages) {
+                        this.data = result.averages;
+                        console.log('Level targets updated from leaderboard');
+                    }
+                } catch (e) {
+                    console.log('Could not fetch level targets');
+                }
+            }
+        };
 
         // Load saved data from localStorage
         function loadSavedData() {
@@ -2833,10 +2870,11 @@
                     const newX = state.selectedWell.x + dx;
                     const newY = state.selectedWell.y + dy;
                     // Check collision with other wells (skip if cheats enabled)
+                    // Use radius + 10 to match placement distance
                     const collides = !state.cheatsEnabled && state.wells.some(w => {
                         if (w === state.selectedWell) return false;
                         const dist = Math.sqrt((newX - w.x) ** 2 + (newY - w.y) ** 2);
-                        return dist < w.radius + state.selectedWell.radius;
+                        return dist < w.radius + 10;
                     });
                     if (!collides) {
                         state.selectedWell.x = newX;
@@ -3245,6 +3283,19 @@
                 return response.json();
                 */
                 return { rank: null, local: true };
+            },
+
+            // Get average attempts/nodes for each level from top N players
+            async getLevelAverages(topN = 100) {
+                // TODO: Implement when database is ready
+                /*
+                const response = await fetch(`${this.baseUrl}/level-averages?top=${topN}`);
+                const data = await response.json();
+                // Expected response: { averages: { 0: { avgAttempts, avgNodes, count }, 1: {...}, ... } }
+                return data;
+                */
+                // For now, return local flag to indicate no real data
+                return { averages: {}, local: true };
             }
         };
 
@@ -3640,6 +3691,7 @@
         loadSavedData();
         initLeaderboard();
         initEditor();
+        levelTargets.fetchTargets();  // Fetch dynamic targets from leaderboard
         document.getElementById('attractorBtn').classList.add('active');
         loadLevel(state.currentLevel);
         requestAnimationFrame(gameLoop);
