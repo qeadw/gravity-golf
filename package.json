@@ -1,0 +1,24 @@
+{
+  "name": "gravity-golf",
+  "version": "1.0.0",
+  "description": "A gravitational puzzle golf game with 60 levels",
+  "main": "index.html",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build step required'",
+    "db:setup": "node scripts/setup-db.js"
+  },
+  "dependencies": {
+    "@vercel/postgres": "^0.5.0"
+  },
+  "devDependencies": {},
+  "keywords": [
+    "game",
+    "puzzle",
+    "golf",
+    "gravity",
+    "physics"
+  ],
+  "author": "",
+  "license": "MIT"
+}
