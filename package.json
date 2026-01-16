@@ -1,6 +1,7 @@
 {
   "name": "gravity-golf",
   "version": "1.0.0",
+  "type": "module",
   "description": "A gravitational puzzle golf game with 60 levels",
   "main": "index.html",
   "scripts": {
