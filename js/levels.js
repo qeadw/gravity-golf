@@ -506,12 +506,10 @@ const levels = [
         ball: { x: 100, y: 375 },
         goal: { x: 1100, y: 375, radius: 25 },
         obstacles: [
-            { x: 580, y: 0, width: 40, height: 300 },
-            { x: 580, y: 450, width: 40, height: 300 }
+            { x: 580, y: 0, width: 40, height: 750 }
         ],
         portals: [
-            { x1: 300, y1: 200, x2: 900, y2: 200, radius: 28 },
-            { x1: 300, y1: 550, x2: 900, y2: 550, radius: 28 }
+            { x1: 300, y1: 375, x2: 900, y2: 375, radius: 30 }
         ],
         maxWells: 6,
         launchAngle: 0,
