@@ -1,12 +1,13 @@
 // Physics constants and collision detection
 
 const PHYSICS = {
-    friction: 0.995,
+    friction: 0.999,
+    minSpeed: 0.1,
     maxSpeed: 15,
-    minSpeed: 0.3,
-    wellStrengthMin: 150,
+    wellStrengthMin: 50,
     wellStrengthMax: 300,
-    wellStrengthDefault: 225,
+    wellStrengthDefault: 150,
+    blackHoleStrength: 400,
     bumperForce: 8
 };
 
