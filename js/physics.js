@@ -4,9 +4,9 @@ const PHYSICS = {
     friction: 0.995,
     maxSpeed: 15,
     minSpeed: 0.3,
-    wellStrengthMin: 100,
-    wellStrengthMax: 500,
-    wellStrengthDefault: 300,
+    wellStrengthMin: 150,
+    wellStrengthMax: 300,
+    wellStrengthDefault: 225,
     bumperForce: 8
 };
 
