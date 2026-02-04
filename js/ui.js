@@ -289,7 +289,7 @@ function initUI(canvas) {
             }
         }
 
-        // Cheat code detection
+        // Cheat code and save detection
         if (e.key.length === 1) {
             state.cheatBuffer += e.key.toLowerCase();
             if (state.cheatBuffer.length > 7) {
@@ -309,8 +309,83 @@ function initUI(canvas) {
                 }
                 updateWellCounter();
             }
+            if (state.cheatBuffer.endsWith('save')) {
+                showSaveModal();
+                state.cheatBuffer = '';
+            }
         }
     });
+}
+
+// Save modal functionality
+function createSaveModal() {
+    const modal = document.createElement('div');
+    modal.id = 'saveModal';
+    modal.className = 'modal';
+    modal.innerHTML = `
+        <div class="modal-content" style="max-width: 400px;">
+            <h2 style="margin-bottom: 10px;">💾 Save Management</h2>
+            <p style="color: #aaa; margin-bottom: 20px;">Export your save to back it up, or import a previous save.</p>
+            <div style="display: flex; flex-direction: column; gap: 10px;">
+                <button class="btn" id="exportSaveBtn" style="background: #4a9;">📥 Export Save</button>
+                <label class="btn" style="background: #49a; cursor: pointer; text-align: center;">
+                    📤 Import Save
+                    <input type="file" id="importSaveInput" accept=".json" style="display: none;">
+                </label>
+                <button class="btn" id="closeSaveModal" style="background: #666; margin-top: 10px;">Close</button>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+
+    document.getElementById('closeSaveModal').onclick = hideSaveModal;
+    document.getElementById('exportSaveBtn').onclick = exportSave;
+    document.getElementById('importSaveInput').onchange = importSave;
+}
+
+function showSaveModal() {
+    if (!document.getElementById('saveModal')) {
+        createSaveModal();
+    }
+    document.getElementById('saveModal').classList.add('show');
+}
+
+function hideSaveModal() {
+    document.getElementById('saveModal').classList.remove('show');
+}
+
+function exportSave() {
+    const saveData = localStorage.getItem('gravityGolfData');
+    if (!saveData) {
+        alert('No save data found!');
+        return;
+    }
+    const blob = new Blob([saveData], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `gravity-golf-save-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function importSave(e) {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (event) => {
+        try {
+            const data = JSON.parse(event.target.result);
+            localStorage.setItem('gravityGolfData', JSON.stringify(data));
+            alert('Save imported successfully! Refreshing...');
+            location.reload();
+        } catch (err) {
+            alert('Invalid save file!');
+        }
+    };
+    reader.readAsText(file);
+    e.target.value = '';
 }
 
 // Export for use in other modules
