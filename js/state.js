@@ -103,14 +103,38 @@ const levelTargets = {
     }
 };
 
+// Obfuscation helpers
+const SAVE_VERSION = 'GG1:';
+const OBF_KEY = 'GravityGolf2024';
+
+function obfuscateSave(data) {
+    let result = '';
+    for (let i = 0; i < data.length; i++) {
+        result += String.fromCharCode(data.charCodeAt(i) ^ OBF_KEY.charCodeAt(i % OBF_KEY.length));
+    }
+    return SAVE_VERSION + btoa(result);
+}
+
+function deobfuscateSave(data) {
+    if (!data.startsWith(SAVE_VERSION)) return data; // Legacy save
+    const encoded = data.slice(SAVE_VERSION.length);
+    const decoded = atob(encoded);
+    let result = '';
+    for (let i = 0; i < decoded.length; i++) {
+        result += String.fromCharCode(decoded.charCodeAt(i) ^ OBF_KEY.charCodeAt(i % OBF_KEY.length));
+    }
+    return result;
+}
+
 // Save/load functions
 function saveData() {
     try {
-        localStorage.setItem('gravityGolfData', JSON.stringify({
+        const saveJson = JSON.stringify({
             completedLevels: Array.from(state.completedLevels),
             levelStats: state.levelStats,
             currentLevel: state.currentLevel
-        }));
+        });
+        localStorage.setItem('gravityGolfData', obfuscateSave(saveJson));
     } catch (e) {
         console.log('Could not save game data');
     }
@@ -120,7 +144,7 @@ function loadSavedData() {
     try {
         const saved = localStorage.getItem('gravityGolfData');
         if (saved) {
-            const data = JSON.parse(saved);
+            const data = JSON.parse(deobfuscateSave(saved));
             state.completedLevels = new Set(data.completedLevels || []);
             state.levelStats = data.levelStats || {};
             state.currentLevel = data.currentLevel || 0;

@@ -330,7 +330,7 @@ function createSaveModal() {
                 <button class="btn" id="exportSaveBtn" style="background: #4a9;">📥 Export Save</button>
                 <label class="btn" style="background: #49a; cursor: pointer; text-align: center;">
                     📤 Import Save
-                    <input type="file" id="importSaveInput" accept=".json" style="display: none;">
+                    <input type="file" id="importSaveInput" accept=".sav" style="display: none;">
                 </label>
                 <button class="btn" id="closeSaveModal" style="background: #666; margin-top: 10px;">Close</button>
             </div>
@@ -360,11 +360,11 @@ function exportSave() {
         alert('No save data found!');
         return;
     }
-    const blob = new Blob([saveData], { type: 'application/json' });
+    const blob = new Blob([saveData], { type: 'text/plain' });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
-    a.download = `gravity-golf-save-${new Date().toISOString().split('T')[0]}.json`;
+    a.download = `gravity-golf-save-${new Date().toISOString().split('T')[0]}.sav`;
     a.click();
     URL.revokeObjectURL(url);
 }
@@ -376,8 +376,13 @@ function importSave(e) {
     const reader = new FileReader();
     reader.onload = (event) => {
         try {
-            const data = JSON.parse(event.target.result);
-            localStorage.setItem('gravityGolfData', JSON.stringify(data));
+            const saveData = event.target.result;
+            // Validate obfuscated format
+            if (!saveData.startsWith('GG1:')) {
+                alert('Invalid save file format!');
+                return;
+            }
+            localStorage.setItem('gravityGolfData', saveData);
             alert('Save imported successfully! Refreshing...');
             location.reload();
         } catch (err) {
